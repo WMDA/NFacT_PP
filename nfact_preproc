@@ -1,0 +1,360 @@
+#!/bin/bash
+
+# Written by Shaun Warrington, Ellie Thompson and Stam Sotiropoulos
+
+# function to submit python jobs (to cluster or local) with dependencies
+run_python(){
+    # run <command> [job_id to wait for]
+    commands=$1
+    out=$2
+    time=$3
+    mem=$4
+    JID=$5
+    waitforme=""
+    if [ "x$JID" != "x" ];then
+    	waitforme=" -j $JID"
+    fi
+
+    if [ "x$SGE_ROOT" != "x" ]; then  # Submit all commands to run in parallel on the cluster
+	    JID=`fsl_sub -T $time -R $mem -q bigmem.q $waitforme -l $out/logs -N nfact_py -t $commands`
+    else   # If no SGE, run locally
+    	sh $commands
+    fi
+    echo $JID
+}
+
+# function to join arguments by comma
+function join_str { local IFS="$1"; shift; echo "$*"; }
+
+shopt -s extglob
+
+code_folder="$HOME/scripts_dev/nmf_addon/v0.1/nfact_py"
+blueprint_code_folder="$HOME/scripts_dev/xtract_blueprint"
+
+Splash (){
+cat <<EOF
+
+##    ## ########    ###     ######  ########         ########  ########
+###   ## ##         ## ##   ##    ##    ##            ##     ## ##     ##
+####  ## ##        ##   ##  ##          ##            ##     ## ##     ##
+## ## ## ######   ##     ## ##          ##            ########  ########
+##  #### ##       ######### ##          ##            ##        ##
+##   ### ##       ##     ## ##    ##    ##            ##        ##
+##    ## ##       ##     ##  ######     ##    ####### ##        ##
+
+EOF
+}
+Splash
+
+
+Usage() {
+    cat << EOF
+
+Usage:
+    nfact_preproc -study <path> -subject_list <txt> -bpx <path> -seeds <left> <right> -rois <left> <right> -warps <std2diff> <diff2std> -ref <mask> [options]
+
+    Compulsory arguments:
+
+       -study        <folder>                       Study folder containing subject sub-directories - should lead to the subject folder
+       -subject_list <txt>                          Line separated list of subject IDs in text file
+
+       -bpx          <path>                         The suffix of the bedpoxtX directory (e.g. <study>/<subid>/<bpx>)
+       -seeds        <left> <right>                 The suffixes of the paths leading to the left and right hemisphere cortical seeds (white-grey boundary GIFTI)
+       -rois         <left> <right>                 The suffixes of the paths leading to the left and right hemisphere medial wall masks (GIFTI)
+       -warps        <std2diff> <diff2std>          The suffix of the path leading to the transforms between standard space and diffusion space
+
+       -ref          <path>                         The full path to the standard space target (e.g. MNI152 brain mask)
+
+    Optional arguments:
+       -prefix       <str>                          Designate a prefix to the group-level output directory name (default directory name: <study>/nfact_group)
+       -out          <folder>                       Path to output folder (default is to create subject-level output under the input subject directory and group-level under the study folder)
+       -no_average                                  Do not perform connectivity matrix averaging - required for NMF (default averages across all subjects)
+
+       -gpu                                         Use GPU version
+       -nsamples                                    Number of samples per seed used in tractography (default = 1000)
+       -res          <mm>                           Resolution of NMF volume components (Default = 2 mm)
+       -ptx_options  <options.txt>                  Pass extra probtrackx2 options as a text file to override defaults
+
+
+Example call:
+
+  To call nfact_preproc for the subject 'sub-01':
+
+    nfact_preproc -study /data/study_x -subject_list /home/data/list
+        -bpx Diffusion.bedpostX -seeds L.white.surf.gii R.white.surf.gii
+        -rois L.medwall.shape.gii R.medwall.shape.gii
+        -warps standard2acpc_dc.nii.gz acpc_dc2standard.nii.gz
+        -ref <FSLDIR>/data/standard/MNI152_T1_2mm_brain.nii.gz
+
+    The bedpostX directory path would then be /data/study_x/sub-01/Diffusion.bedpostX and the path to the left seed would be /data/study_x/sub-01/L.white.surf.gii, for example.
+    All path suffixes should be generic and consistent across subjects (i.e. not contain any subject IDs).
+
+EOF
+    exit 1
+}
+
+[ "$1" = "" ] && Usage
+
+# Set default options
+study_folder=""
+subject_list=""
+bpx_suff=""
+left_seed_suff=""
+right_seed_suff=""
+left_roi_suff=""
+right_roi_suff=""
+stdref_suff=""
+diff2std_suff=""
+prefix=""
+out=""
+ref=""
+gpu=0
+no_average=0
+res=2
+nsamples=1000
+
+# Parse command-line arguments
+while [ ! -z "$1" ];do
+    case "$1" in
+  -study) study_folder=$2;shift;;
+	-bpx) bpx_suff=$2;shift;;
+  -subject_list) subject_list=$2;shift;;
+  -seeds) left_seed_suff=$2;right_seed_suff=$3;shift;shift;;
+  -rois) left_roi_suff=$2;right_roi_suff=$3;shift;shift;;
+	-warps) std2diff_suff=$2;diff2std_suff=$3;shift;shift;;
+  -ref) ref=$2;shift;;
+  -prefix) prefix=$2;shift;;
+  -out) out=$2;shift;;
+	-gpu) gpu=1;;
+  -no_average) no_average=1;;
+	-res) res=$2;shift;;
+  -nsamples) nsamples=$2;shift;;
+	*) echo "Unknown option '$1'";exit 1;;
+    esac
+    shift
+done
+
+# Check compulsory arguments
+errflag=0
+if [ "$study_folder" == "" ];then
+    echo "Must set compulsory argument '-study'"
+    errflag=1
+fi
+if [ "$bpx_suff" == "" ];then
+    echo "Must set compulsory argument '-bpx'"
+    errflag=1
+fi
+if [ "$left_seed_suff" == "" ];then
+    echo "Must set compulsory argument '-seeds'"
+    errflag=1
+fi
+if [ "$right_seed_suff" == "" ];then
+    echo "Must set compulsory argument '-seeds'"
+    errflag=1
+fi
+if [ "$left_roi_suff" == "" ];then
+    echo "Must set compulsory argument '-rois'"
+    errflag=1
+fi
+if [ "$right_roi_suff" == "" ];then
+    echo "Must set compulsory argument '-rois'"
+    errflag=1
+fi
+if [ "$std2diff_suff" == "" ];then
+    echo "Must set compulsory argument '-warps'"
+    errflag=1
+fi
+if [ "$diff2std_suff" == "" ];then
+    echo "Must set compulsory argument '-warps'"
+    errflag=1
+fi
+if [ "$ref" == "" ];then
+    echo "Must set compulsory argument '-ref'"
+    errflag=1
+fi
+if [ "$subject_list" == "" ];then
+    echo "Must set compulsory argument '-subject_list'"
+    errflag=1
+fi
+if [ ! -f $subject_list ];then
+  echo "Subject ID list file $subject_list not found"
+  errflag=1
+fi
+if [ ! -f $ref ];then
+  echo "Reference file $ref not found"
+  errflag=1
+fi
+
+########## For each subject, check that files exist before continuing
+for id in `cat $subject_list`; do
+  bpx=$study_folder/$id/$bpx_suff
+  left_seed=$study_folder/$id/$left_seed_suff
+  right_seed=$study_folder/$id/$right_seed_suff
+  left_roi=$study_folder/$id/$left_roi_suff
+  right_roi=$study_folder/$id/$right_roi_suff
+  std2diff=$study_folder/$id/$std2diff_suff
+  diff2std=$study_folder/$id/$diff2std_suff
+
+  if [ ! -d $bpx ];then
+    echo "bedpostX directory $bpx not found"
+    errflag=1
+  fi
+  if [ ! -f $left_seed ];then
+    echo "Left seed surface file $left_seed not found"
+    errflag=1
+  fi
+  if [ ! -f $right_seed ];then
+    echo "Right seed surface file $right_seed not found"
+    errflag=1
+  fi
+  if [ ! -f $left_roi ];then
+    echo "Left ROI surface file $left_roi not found"
+    errflag=1
+  fi
+  if [ ! -f $right_roi ];then
+    echo "Right ROI surface file $right_roi not found"
+    errflag=1
+  fi
+  if [ ! -f $std2diff ];then
+    echo "Warp file $std2diff not found"
+    errflag=1
+  fi
+  if [ ! -f $diff2std ];then
+    echo "Warp file $diff2std not found"
+    errflag=1
+  fi
+done
+
+# check error flag and exit if required
+if [ "$errflag" -eq 1 ];then
+    echo ""
+    echo "Exit without doing anything..."
+    exit 1
+fi
+
+# GPU stuff
+if [ "$gpu" == 0 ];then
+    ptxbin=$FSLDIR/bin/probtrackx2
+    echo "Warning: not using GPU mode - this may take a while. Consider downsampling the seed mask."
+else
+    ptxbin=${ptxbin_gpu}
+fi
+
+# where are we saving stuff?
+if [ "$out" == "" ];then
+  out=$study_folder
+fi
+
+noSubs=`cat $subject_list | wc -w` # number of subjects in subject_list
+if [ "x$SGE_ROOT" != "x" ]; then
+  echo "Submitting tractography for $noSubs subjects"
+else
+  echo "Running tractography for $noSubs subjects"
+fi
+
+#### Stage 1: run matrix2 tractography through xtract_blueprint and average matrices
+wait_ids="" # job IDs to wait for prior to NMF processing, if $SGE_ROOT is set
+COUNTER=1
+for id in `cat $subject_list`; do
+  echo "Subject $COUNTER of $noSubs"
+
+  bpx=$study_folder/$id/$bpx_suff
+  left_seed=$study_folder/$id/$left_seed_suff
+  right_seed=$study_folder/$id/$right_seed_suff
+  left_roi=$study_folder/$id/$left_roi_suff
+  right_roi=$study_folder/$id/$right_roi_suff
+  std2diff=$study_folder/$id/$std2diff_suff
+  diff2std=$study_folder/$id/$diff2std_suff
+
+  sub_out=$out/$id/nfact
+
+  mkdir -p $sub_out
+  # path length correction
+  rm -rf $sub_out/ptx_options.txt
+  echo "--pd" >> $sub_out/ptx_options.txt
+  # create a temporary xtractdir so xtract_blueprint doesn't break
+  mkdir -p $sub_out/tmpx
+
+  # xtract_blueprint arguments
+  args="-bpx $bpx -out $sub_out"
+  args="$args -seeds $left_seed,$right_seed"
+  args="$args -rois $left_roi,$right_roi"
+  args="$args -warps $ref $std2diff $diff2std"
+  args="$args -res $res -stage 1 -ptx_options $sub_out/ptx_options.txt -nsamples $nsamples"
+  args="$args -xtract $sub_out/tmpx -tract_list null" # provide fake xtract arguments
+  if [ $gpu == 1 ]; then
+    args="$args -gpu"
+  fi
+
+  # submit job and capture job ID is SGE_ROOT
+  if [ "x$SGE_ROOT" != "x" ]; then
+    jobid=`${blueprint_code_folder}/xtract_blueprint $args`
+    jobid=`echo -e $jobid | awk '{print $NF}'`
+    wait_ids="$wait_ids $jobid"
+  else
+    ${blueprint_code_folder}/xtract_blueprint $args
+  fi
+  COUNTER=$((COUNTER+1))
+done
+wait_ids=`join_str , $wait_ids`
+
+#### fdt_matrix2 averaging
+if [ "$no_average" -eq 0 ]; then
+  # build example matrix2 results directory path
+  ptx_folders=""
+  for seed in $left_seed_suff $right_seed_suff; do
+      r=`basename $seed`
+      r=`echo ${r%%.@(nii|nii.gz|gii|surf.gii|asc)}`    # remove extensions
+      ptx_folders="$ptx_folders $out/subid/nfact/omatrix2/omatrix2_$r"
+  done
+  ptx_folders=`join_str , $ptx_folders`
+
+  # create output directory
+  if [ "$prefix" == "" ];then
+    nfact_out=$out/nfact_group
+  else
+    nfact_out=$out/${prefix}_nfact_group
+  fi
+  if [ -d $nfact_out ];then
+      echo "Warning: Output folder already exists. Some of the files may be overwritten"
+  fi
+  mkdir -p $nfact_out
+  mkdir -p $nfact_out/config
+
+  # copy seed and medial wall files for building CIFTIs
+  id=`sed -n 1p $subject_list`
+  cp $study_folder/$id/$left_seed_suff $nfact_out/config/L.white.surf.gii
+  cp $study_folder/$id/$right_seed_suff $nfact_out/config/R.white.surf.gii
+  cp $study_folder/$id/$left_roi_suff $nfact_out/config/L.roi.shape.gii
+  cp $study_folder/$id/$right_roi_suff $nfact_out/config/R.roi.shape.gii
+
+  commands=$nfact_out/average_matrix2_command.txt
+  rm -rf $commands
+
+  cmd="$code_folder/nfact_averaging $subject_list $ptx_folders $nfact_out"
+  echo $cmd >> $commands
+  chmod +x $commands
+
+  # how much time/memory is needed?
+  nvert=`grep 'Dim0=' $left_seed`
+  nvert=`echo $nvert | awk -F'"' '{print $2}'`
+
+  if [ $nvert -gt 25000 ]; then
+    time=$( bc -l <<<"90*$noSubs + 90" )
+    mem=100000
+  elif [ $nvert -gt 6000 ]; then
+    time=$( bc -l <<<"40*$noSubs + 60" )
+    mem=30000
+  else
+    time=$( bc -l <<<"20*$noSubs + 60" )
+    mem=10000
+  fi
+
+  if [ "x$SGE_ROOT" != "x" ]; then
+    jobid=`run_python $commands $nfact_out $time $mem $wait_ids`
+  else
+    run_python $commands $nfact_out $time $mem
+  fi
+fi
+
+echo "Done"

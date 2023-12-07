@@ -1,0 +1,270 @@
+#!/bin/bash
+
+# Written by Shaun Warrington, Ellie Thompson and Stam Sotiropoulos
+
+# function to submit python jobs (to cluster or local) with dependencies
+run_python(){
+    # run <command> [job_id to wait for]
+    commands=$1
+    out=$2
+    time=$3
+    mem=$4
+    JID=$5
+    waitforme=""
+    if [ "x$JID" != "x" ];then
+    	waitforme=" -j $JID"
+    fi
+
+    if [ "x$SGE_ROOT" != "x" ]; then  # Submit all commands to run in parallel on the cluster
+	    JID=`fsl_sub -T $time -R $mem -q bigmem.q $waitforme -l $out/logs -N nfact_py -t $commands`
+    else   # If no SGE, run locally
+    	sh $commands
+    fi
+    echo $JID
+}
+
+# function to join arguments by comma
+function join_str { local IFS="$1"; shift; echo "$*"; }
+
+
+shopt -s extglob
+
+code_folder="$HOME/scripts_dev/nmf_addon/v0.1/nfact_py"
+
+Splash (){
+cat <<EOF
+
+##    ## ########    ###     ######  ########         ########  ########
+###   ## ##         ## ##   ##    ##    ##            ##     ## ##     ##
+####  ## ##        ##   ##  ##          ##            ##     ## ##     ##
+## ## ## ######   ##     ## ##          ##            ##     ## ########
+##  #### ##       ######### ##          ##            ##     ## ##   ##
+##   ### ##       ##     ## ##    ##    ##            ##     ## ##    ##
+##    ## ##       ##     ##  ######     ##    ####### ########  ##     ##
+
+EOF
+}
+Splash
+
+
+Usage() {
+    cat << EOF
+
+Usage:
+    nfact_dualregress -gm_comps <path> [options]
+
+    Compulsory arguments:
+       -gm_comps     <path>                       Path to NFacT GM components (CIFTI) to use in regression
+
+    AND EITHER:
+       -sub_dir      <folder>                     Directory containing target subject's NFacT results folder
+       -seeds        <left> <right>               Paths to the left and right cortical seeds (white-grey boundary GIFTI)
+       -rois         <left> <right>               Paths to the left and right medial wall masks (GIFTI)
+
+    OR:
+       -nfact_dir    <folder>                     Directory containing the target group-level NFacT connectivity matrix
+
+    Optional arguments:
+       -out          <path>                       Output directory for dual regression results (default <nfact_dir>)
+       -n_cores      <int>                        The number of cores to use in dual regression (default = 1)
+
+Example call:
+
+  nfact_dualregress may be use to regress to a single subject's data or to group-level data.
+
+  To call nfact for group-level to subject-level regression (from nfact_preproc):
+
+    nfact_dualregress -gm_comps /home/nfact_group/NMF_GM_100.LR.dscalar.nii -sub_dir /home/sub-01/nfact \
+        -seeds /home/sub-01/L.white.surf.gii /home/sub-01/R.white.surf.gii \
+        -rois /home/sub-01/L.roi.shape.gii /home/sub-01/R.roi.shape.gii
+
+  /home/nfact_group/NMF_GM_100.LR.dscalar.nii is the decomposition and sub-01 is the target.
+
+EOF
+    exit 1
+}
+
+[ "$1" = "" ] && Usage
+
+# Set default options
+gm_comps=""
+nfact_dir=""
+sub_dir=""
+left_seed=""
+right_seed=""
+left_roi=""
+right_roi=""
+out=""
+n_cores=1
+
+# Parse command-line arguments
+while [ ! -z "$1" ];do
+    case "$1" in
+  -gm_comps) gm_comps=$2;shift;;
+  -nfact_dir) nfact_dir=$2;shift;;
+  -sub_dir) sub_dir=$2;shift;;
+  -seeds) left_seed=$2;right_seed=$3;shift;shift;;
+  -rois) left_roi=$2;right_roi=$3;shift;shift;;
+  -out) out=$2;shift;;
+  -n_cores) n_cores=$2;shift;;
+	*) echo "Unknown option '$1'";exit 1;;
+    esac
+    shift
+done
+
+# Check compulsory arguments
+errflag=0
+if [ "$gm_comps" == "" ];then
+    echo "Must set compulsory argument '-gm_comps'"
+    errflag=1
+elif [ ! -f $gm_comps ];then
+  echo "Group-level GM components $gm_comps not found"
+  errflag=1
+fi
+if [ "$nfact_dir" == "" ] && [ "$sub_dir" == "" ];then
+    echo "Must set either compulsory argument '-nfact_dir' or '-sub_dir'"
+    errflag=1
+elif [ ! "$nfact_dir" == "" ] && [ ! "$sub_dir" == "" ];then
+    echo "Both '-nfact_dir' and '-sub_dir' have been provided - only provide one."
+    errflag=1
+fi
+# if doing subject-level check arguments
+if [ ! "$sub_dir" == "" ];then
+  if [ "$left_seed" == "" ] || [ "$right_seed" == "" ];then
+    echo "Must provide two inputs for argument '-seeds'"
+    errflag=1
+  fi
+  if [ ! -f $left_seed ];then
+    echo "Left seed surface file $left_seed not found"
+    errflag=1
+  fi
+  if [ ! -f $right_seed ];then
+    echo "Right seed surface file $right_seed not found"
+    errflag=1
+  fi
+  if [ "$left_roi" == "" ] || [ "$right_roi" == "" ];then
+    echo "Must provide two inputs for argument '-rois'"
+    errflag=1
+  fi
+  if [ ! -f $left_roi ];then
+    echo "Left ROI surface file $left_roi not found"
+    errflag=1
+  fi
+  if [ ! -f $right_roi ];then
+    echo "Right ROI surface file $right_roi not found"
+    errflag=1
+  fi
+fi
+
+re='^[0-9]+$'
+if [ $n_cores = 0 ]; then
+   echo "The number of cores '-n_cores' must be greater than zero"
+   errflag=1
+elif ! [[ $n_cores =~ $re ]]; then
+    echo "The number of cores '-n_cores' must be an integer"
+    errflag=1
+fi
+
+# check error flag and exit if required
+if [ "$errflag" -eq 1 ];then
+    echo ""
+    echo "Exit without doing anything..."
+    exit 1
+fi
+
+if [ "x$SGE_ROOT" != "x" ]; then
+  echo "Submitting dual regresison jobs..."
+else
+  echo "Running dual regresison  processing..."
+fi
+
+#### dual regression
+# have an option to dual regress to all subjects in NMF directory
+# or to a group-level matrix (.npz or .dot format)
+
+# check which type of regression we're doing (group or subject?)
+if [ ! "$nfact_dir" == "" ];then # group-level regression
+    echo "Group-level dual regression"
+    # output directory
+    if [ "$out" == "" ];then
+      out=$nfact_dir
+    else
+      if [ -d $out ];then
+          echo "Warning: Output folder already exists. Some of the files may be overwritten"
+      fi
+      mkdir -p $out
+    fi
+
+    cm_paths="$nfact_dir/average_matrix2.npz"
+    seeds="$nfact_dir/config/L.white.surf.gii,$nfact_dir/config/R.white.surf.gii"
+    rois="$nfact_dir/config/L.roi.shape.gii,$nfact_dir/config/R.roi.shape.gii"
+    waytotal="x"
+    tract_coords="$nfact_dir/config/tract_space_coords_for_fdt_matrix2"
+    lookup="$nfact_dir/config/lookup_tractspace_fdt_matrix2.nii.gz"
+    r_flag=0 # flag to tell if group or subject level: 0=group, 1=subject
+
+else # single-subject-level dual-regression
+    echo "Individual subject dual regression"
+    # output directory
+    if [ "$out" == "" ];then
+      out=$sub_dir
+    else
+      if [ -d $out ];then
+          echo "Warning: Output folder already exists. Some of the files may be overwritten"
+      fi
+      mkdir -p $out
+    fi
+
+    seeds="$left_seed,$right_seed"
+    rois="$left_roi,$right_roi"
+
+    waytotal=""
+    cm_paths=""
+    for seed in $left_seed $right_seed; do
+        r=`basename $seed`
+        r=`echo ${r%%.@(nii|nii.gz|gii|surf.gii|asc)}`    # remove extensions
+        waytotal="$waytotal $sub_dir/omatrix2/omatrix2_$r/waytotal"
+        cm_paths="$cm_paths $sub_dir/omatrix2/omatrix2_$r/fdt_matrix2.dot"
+
+        tract_coords="$sub_dir/omatrix2/omatrix2_$r/tract_space_coords_for_fdt_matrix2"
+        lookup="$sub_dir/omatrix2/omatrix2_$r/lookup_tractspace_fdt_matrix2.nii.gz"
+    done
+    cm_paths=`join_str , $cm_paths`
+    waytotal=`join_str , $waytotal`
+    r_flag=1
+
+fi
+
+# python args: group_gm_path, cmat_path(s), target seed paths, target ROI paths
+#              waytotal paths, target ref NIFTI, results_path, n_cores
+# group_gm_path = the group NMF decomposition
+# cmat_path = comma separated list of fdt_matrices (i.e. left,right) or .npz whole-brain
+# target seeds, ROIs, ref = the surface and volume structures of the target data
+# waytotal paths = paths to waytotal files (if single-subject) or 'x' for group
+
+# build python command
+commands=$out/dualregress_command.txt
+rm -rf $commands
+
+cmd="$code_folder/nfact_dr $out $gm_comps $cm_paths"
+cmd="$cmd $seeds $rois $waytotal $tract_coords $lookup $r_flag $n_cores"
+echo $cmd >> $commands
+chmod +x $commands
+
+# how much time/memory is needed?
+nvert=(`echo $seeds | sed s@","@" "@g`)
+nvert=`grep 'Dim0=' $nvert`
+nvert=`echo $nvert | awk -F'"' '{print $2}'`
+
+if [ $nvert -gt 25000 ]; then
+  time=1440
+  mem=150000
+elif [ $nvert -gt 6000 ]; then
+  time=1440
+  mem=75000
+else
+  time=1440
+  mem=30000
+fi
+
+run_python $commands $out $time $mem
