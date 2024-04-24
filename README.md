@@ -74,7 +74,9 @@ To call nfact for group-level decomposition:
 
   nfact -nfact_dir /home/nfact
 
-Where /home/nfact
+Where 
+```
+/home/nfact
         ├── average_matrix2.npz                      - the whole-brain connectivity matrix
         └── config                                   - config directory containing coordinate, seed and target files
             ├── L.white.surf.gii                     - the surface seed for the left hemisphere
@@ -85,14 +87,16 @@ Where /home/nfact
             ├── R.coords_for_fdt_matrix2             - the surface coordinates for the right hemisphere seed
             ├── lookup_tractspace_fdt_matrix2.nii.gz - the volume space target lookup file
             └── tract_space_coords_for_fdt_matrix2   - the volume space coordinates file
-
+```
 
 To call nfact for subject-level decomposition:
 
     nfact -sub_dir /home/sub-01/nfact -seeds /home/sub-01/L.white.surf.gii /home/sub-01/R.white.surf.gii
         -rois /home/sub-01/L.roi.shape.gii /home/sub-01/R.roi.shape.gii
 
-Where /home/sub-01/nfact
+Where 
+```
+/home/sub-01/nfact
         └── omatrix2
             ├── omatrix2_L.white
             │   ├── coords_for_fdt_matrix2
@@ -106,7 +110,7 @@ Where /home/sub-01/nfact
                 ├── lookup_tractspace_fdt_matrix2.nii.gz
                 ├── tract_space_coords_for_fdt_matrix2
                 └── waytotal
-
+```
 
 Take the hard work out of it.... it's easiest to use nfact_preproc!
 
@@ -189,6 +193,7 @@ A set of subject IDs should be provided as a line separated text file (i.e. a su
 
 To run nfact_preproc for a set of subjects, file names and directory structure must be consistent across subjects (i.e. file names should not contain any reference to subject IDs). The 'study' path should lead to a directory containing a set of subject directories. Each subject directory should then contain the input files required. For example:
 
+```
 /home/study1
     ├── subject-01
     │       ├── dmri.bedpostx                            - the bedpostx directory          
@@ -205,6 +210,7 @@ To run nfact_preproc for a set of subjects, file names and directory structure m
             ├── std2diff.nii.gz diff2std.nii.gz        
             ├── L.white.surf.gii R.white.surf.gii      
             └── L.medwall.shape.gii R.medwall.shape.gii
+```
 
 These data could then be processed using nfact_preproc with the command call:
 
@@ -279,26 +285,26 @@ In order to regress from a decomposition to a new connectivity matrix, the GM (s
 
  - To call nfact for group-level to subject-level regression:
 
+```
   nfact_dualregress -gm_comps /home/nfact_group/NMF_GM_100.LR.dscalar.nii -sub_dir /home/sub-01/nfact
       -seeds /home/sub-01/L.white.surf.gii /home/sub-01/R.white.surf.gii
       -rois /home/sub-01/L.roi.shape.gii /home/sub-01/R.roi.shape.gii
-
+```
 Where 'sub_dir' (/home/sub-01/nfact) follows the structure of the subject-level connectivity data from nfact_preproc. /home/nfact_group/NMF_GM_100.LR.dscalar.nii is the decomposition and sub-01 is the target.
 
  - To call nfact for subject-level to subject-level regression (from nfact_preproc):
-
+```
   nfact_dualregress -gm_comps /home/sub-01/nfact/NMF_GM_100.LR.dscalar.nii -sub_dir /home/sub-02/nfact
       -seeds /home/sub-02/L.white.surf.gii /home/sub-02/R.white.surf.gii
       -rois /home/sub-02/L.roi.shape.gii /home/sub-02/R.roi.shape.gii
-
+```
 /home/sub-01/nfact/NMF_GM_100.LR.dscalar.nii is the decomposition and sub-02 is the target.
 
  - You may also regress from one group to another:
-
+```
   nfact_dualregress -gm_comps /home/group1_nfact_group/NMF_GM_100.LR.dscalar.nii -nfact_dir /home/group2_nfact_group
-
+```
 Where 'nfact_dir' (/home/group2_nfact_group) follows the structure of the group-level average from nfact_preproc. /home/group1_nfact_group/NMF_GM_100.LR.dscalar.nii is the decomposition and /home/group2_nfact_group is the target.
-
 
 Regression may also be performed from a group-level decomposition to new subjects (i.e. those not included in group averaging, for example). First, create brain connectivity data for these subjects using nfact_preproc (use the '-no_average' flag as we do not require an addition group average). Next, call nfact_dualregress for each new subject, regressing from the group decomposition.
 
