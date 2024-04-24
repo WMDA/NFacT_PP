@@ -20,6 +20,11 @@ keywords = ["NFACT"]
 dependencies = [
     'scipy',
     'numpy',
-    'progressbar'
+    'progressbar',
+    'pandas',
+    'nibabel',
+    'scikit-learn',
+    'fslpy'
+
 ]
 requires-python = ">=3.8"
