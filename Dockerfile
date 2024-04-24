@@ -8,6 +8,9 @@ VOLUME /NFACT
 
 # Set the working directory to the mount point
 WORKDIR /NFACT
+
+# Install NFACT dependencies
 RUN pip install .
+
 # Set the command to run a bash terminal
 CMD ["/bin/bash"]

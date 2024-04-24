@@ -4,15 +4,16 @@
 #
 # Author: Shaun Warrington <shaun.warrington1@nottingham.ac.uk> and Ellie Thompson
 
-import gzip
-import sys,os,glob,shutil
+import os
+import sys
+import shutil
 import numpy as np
 from scipy import sparse
 from progressbar import progressbar
 
-subject_list_path       = sys.argv[1] # the subject list
-ptx_folder              = sys.argv[2] # the example comma separated ptx_folders
-out                     = sys.argv[3] # the output directory
+subject_list_path = sys.argv[1] # the subject list
+ptx_folder = sys.argv[2] # the example comma separated ptx_folders
+out = sys.argv[3] # the output directory
 
 # for testing
 # subject_list_path       = "/home/mszsaw2/scripts_dev/nmf_addon/subject_list"
@@ -24,14 +25,26 @@ print('Averaging connectivity matrices')
 subject_list_nmf = np.loadtxt(subject_list_path, dtype='str')
 ptx_folder = ptx_folder.split(",")
 
-# function to load fdt_matrix in dot format and convert to sparse
-def load_dot(f):
-    x = np.loadtxt(f)
-    n_seed=x[-1,0]
-    n_target=x[-1,1]
-    row=x[:-1,0]-1
-    col=x[:-1,1]-1
-    data=x[:-1,2]
+def load_dot(file_path: str) -> object:
+    '''
+    Function to convert fdt_matrix in dot format
+    to sparse matrix
+
+    Parameters
+    ----------
+    file_path: str
+        string of file path to fdt matrix
+
+    Returns
+    -------
+    A sparse matrix in co-ordinate format
+    '''
+    x = np.loadtxt(file_path)
+    n_seed = x[-1,0]
+    n_target = x[-1,1]
+    row = x[:-1,0]-1
+    col = x[:-1,1]-1
+    data = x[:-1,2]
     return sparse.coo_matrix((data, (row, col)), shape=(n_seed.astype(int), n_target.astype(int)))
 
 # load, waytotal normalise, stack and return matrix
