@@ -4,6 +4,18 @@
 #
 # Author: Shaun Warrington <shaun.warrington1@nottingham.ac.uk> and Ellie Thompson
 
+import numpy as np
+import sys
+import os
+from scipy import sparse
+from sklearn.decomposition import NMF as nmf
+
+# Image stuff
+import nibabel as nib
+from nibabel import cifti2
+from fsl.data.cifti import cifti2_axes
+
+
 # function to load fdt_matrix in dot format and convert to sparse
 def load_dot(f):
     x = np.loadtxt(f)
@@ -12,7 +24,10 @@ def load_dot(f):
     row=x[:-1,0]-1
     col=x[:-1,1]-1
     data=x[:-1,2]
-    return sparse.coo_matrix((data, (row, col)), shape=(n_seed.astype(int), n_target.astype(int)))
+    return sparse.coo_matrix(
+         (data, (row, col)), 
+          shape=(n_seed.astype(int), 
+          n_target.astype(int)))
 
 # load, waytotal normalise, stack and return matrix
 def dotprep(con_left_path, con_right_path, wt_left_path, wt_right_path):
@@ -38,29 +53,17 @@ def load_connmat(cm_paths, wt_paths, r_flag):
         cmat = sparse.load_npz(cm_paths[0])
     return cmat
 
-import numpy as np
-import sys,os,glob
-from scipy import sparse
-from numpy import array, matrix
-from sklearn.decomposition import NMF as nmf
-import pandas as pd
 
-# Image stuff
-import nibabel as nib
-from nibabel import cifti2
-from fsl.data.image import Image
-from fsl.data.cifti import cifti2_axes
-from fsl.data.cifti import Cifti
 
-out                     = sys.argv[1] # the output directory
-n_components            = int(sys.argv[2]) # model order for the decomposition
-cm_paths                = sys.argv[3] # comma separated connectivity matrices
-seeds                   = sys.argv[4] # comma separated seeds
-rois                    = sys.argv[5] # comma separated ROIs
-waytotal                = sys.argv[6] # comma separated seed coordinates
-tract_coords            = sys.argv[7] # volume coordinates
-lookup                  = sys.argv[8] # volume lookup file
-r_flag                  = int(sys.argv[9]) # volume lookup file
+out = sys.argv[1] # the output directory
+n_components = int(sys.argv[2]) # model order for the decomposition
+cm_paths = sys.argv[3] # comma separated connectivity matrices
+seeds = sys.argv[4] # comma separated seeds
+rois = sys.argv[5] # comma separated ROIs
+waytotal = sys.argv[6] # comma separated seed coordinates
+tract_coords = sys.argv[7] # volume coordinates
+lookup = sys.argv[8] # volume lookup file
+r_flag = int(sys.argv[9]) # volume lookup file
 
 # for testing
 # out="/data/Q1200/Diffusion/nfact"

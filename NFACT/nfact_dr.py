@@ -4,6 +4,19 @@
 #
 # Author: Shaun Warrington <shaun.warrington1@nottingham.ac.uk> and Ellie Thompson
 
+import sys
+import os
+import numpy as np
+from scipy import sparse
+from scipy.optimize import nnls
+import multiprocessing
+from progressbar import progressbar
+import time
+
+# Image stuff
+import nibabel as nib
+from nibabel import cifti2
+from fsl.data.cifti import cifti2_axes
 
 # function to load fdt_matrix in dot format and convert to sparse
 def load_dot(f):
@@ -43,24 +56,7 @@ def nnls_func(p):
     comp, rnorm = nnls(p[0], p[1])
     return comp
 
-import sys,os,glob,re
-import numpy as np
-from numpy import array, matrix
-from scipy import sparse
-import sklearn
-import scipy
-from scipy.optimize import nnls
-import multiprocessing
-from progressbar import progressbar
 
-import time
-
-# Image stuff
-import nibabel as nib
-from nibabel import cifti2
-from fsl.data.image import Image
-from fsl.data.cifti import cifti2_axes
-from fsl.data.cifti import Cifti
 
 
 out                     = sys.argv[1] # the output directory

@@ -21,7 +21,6 @@ dependencies = [
     'scipy',
     'numpy',
     'progressbar',
-    'pandas',
     'nibabel',
     'scikit-learn',
     'fslpy'
