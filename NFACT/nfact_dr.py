@@ -17,7 +17,6 @@ import time
 import nibabel as nib
 from nibabel import cifti2
 from fsl.data.cifti import cifti2_axes
-
 import nfact_functions as nf
 # function to load fdt_matrix in dot format and convert to sparse
 
@@ -133,14 +132,14 @@ W = full_W
 print(f'Output files are:')
 ###### Save CIFTI components
 # build CIFTI brain model and save
-bm_l      = cifti2_axes.BrainModelAxis.from_mask(seed_l, name=f'CortexLeft')
-bm_r      = cifti2_axes.BrainModelAxis.from_mask(seed_r, name=f'CortexRight')
-bm        = bm_l + bm_r
+bm_l = cifti2_axes.BrainModelAxis.from_mask(seed_l, name=f'CortexLeft')
+bm_r = cifti2_axes.BrainModelAxis.from_mask(seed_r, name=f'CortexRight')
+bm = bm_l + bm_r
 new_fname = os.path.join(out, f'NMF_GM_{n_components}.LR.dscalar.nii')
 # save cifti
-sc        = cifti2_axes.ScalarAxis(np.linspace(0, n_components, n_components, dtype='int'))
-hdr       = cifti2.Cifti2Header.from_axes((sc, bm))
-img       = cifti2.Cifti2Image(W.T, hdr)
+sc = cifti2_axes.ScalarAxis(np.linspace(0, n_components, n_components, dtype='int'))
+hdr = cifti2.Cifti2Header.from_axes((sc, bm))
+img = cifti2.Cifti2Image(W.T, hdr)
 nib.save(img, new_fname)
 print(new_fname)
 print('and')
@@ -150,8 +149,8 @@ print('and')
 coords = np.loadtxt(tract_coords, dtype='int')
 ref_img = nib.load(lookup)
 
-(xdim, ydim, zdim)=ref_img.shape
-ref_affine =ref_img.affine
+(xdim, ydim, zdim) = ref_img.shape
+ref_affine = ref_img.affine
 n_target = H.shape[1]
 
 # fill image matrix

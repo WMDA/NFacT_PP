@@ -1,7 +1,6 @@
 #!/usr/bin/env fslpython
 
 # Run pre-NMF processing, including zipping, stacking, conversion to sparse, and averaging
-#
 # Author: Shaun Warrington <shaun.warrington1@nottingham.ac.uk> and Ellie Thompson
 
 import os

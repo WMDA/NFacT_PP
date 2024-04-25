@@ -7,53 +7,13 @@
 import numpy as np
 import sys
 import os
-from scipy import sparse
 from sklearn.decomposition import NMF as nmf
 
 # Image stuff
 import nibabel as nib
 from nibabel import cifti2
 from fsl.data.cifti import cifti2_axes
-
-
-# function to load fdt_matrix in dot format and convert to sparse
-def load_dot(f):
-    x = np.loadtxt(f)
-    n_seed=x[-1,0]
-    n_target=x[-1,1]
-    row=x[:-1,0]-1
-    col=x[:-1,1]-1
-    data=x[:-1,2]
-    return sparse.coo_matrix(
-         (data, (row, col)), 
-          shape=(n_seed.astype(int), 
-          n_target.astype(int)))
-
-# load, waytotal normalise, stack and return matrix
-def dotprep(con_left_path, con_right_path, wt_left_path, wt_right_path):
-    con_left = load_dot(con_left_path)
-    waytotal = np.loadtxt(wt_left_path)
-    con_left = con_left.tocsr()
-    con_left.multiply(1e8/waytotal)
-    con_right = load_dot(con_right_path)
-    waytotal = np.loadtxt(wt_right_path)
-    con_right = con_right.tocsr()
-    con_right.multiply(1e8/waytotal)
-    return sparse.vstack([con_left, con_right])
-
-def load_connmat(cm_paths, wt_paths, r_flag):
-    cm_paths = cm_paths.split(",")
-    extension = os.path.splitext(cm_paths[0])[1]
-    wt_paths = wt_paths.split(",")
-    # either .dot with two hemispheres (single-subject)
-    # OR .npz because it is averaged using this package
-    if r_flag == 1:
-        cmat = dotprep(cm_paths[0], cm_paths[1], wt_paths[0], wt_paths[1])
-    elif r_flag == 0:
-        cmat = sparse.load_npz(cm_paths[0])
-    return cmat
-
-
+import nfact_functions as nf
 
 out = sys.argv[1] # the output directory
 n_components = int(sys.argv[2]) # model order for the decomposition
@@ -85,11 +45,11 @@ rois = rois.split(",")
 alpha = 0.1
 
 # regularisation parameters
-l1_ratio=1
+l1_ratio = 1
 
 # load connectivity matrix
 print("Loading data...")
-connectivity_matrix = load_connmat(cm_paths, waytotal, r_flag)
+connectivity_matrix = nf.load_connmat(cm_paths, waytotal, r_flag)
 connectivity_matrix = connectivity_matrix.toarray()
 
 # apply NMF to connectivity matrix
@@ -120,14 +80,14 @@ full_W[roi == 1, :] = W
 W = full_W
 
 # build CIFTI brain model and save
-bm_l      = cifti2_axes.BrainModelAxis.from_mask(seed_l, name=f'CortexLeft')
-bm_r      = cifti2_axes.BrainModelAxis.from_mask(seed_r, name=f'CortexRight')
-bm        = bm_l + bm_r
+bm_l = cifti2_axes.BrainModelAxis.from_mask(seed_l, name=f'CortexLeft')
+bm_r = cifti2_axes.BrainModelAxis.from_mask(seed_r, name=f'CortexRight')
+bm = bm_l + bm_r
 new_fname = os.path.join(out, f'NMF_GM_{n_components}.LR.dscalar.nii')
 # save cifti
-sc        = cifti2_axes.ScalarAxis(np.linspace(0, n_components, n_components, dtype='int'))
-hdr       = cifti2.Cifti2Header.from_axes((sc, bm))
-img       = cifti2.Cifti2Image(W.T, hdr)
+sc = cifti2_axes.ScalarAxis(np.linspace(0, n_components, n_components, dtype='int'))
+hdr = cifti2.Cifti2Header.from_axes((sc, bm))
+img = cifti2.Cifti2Image(W.T, hdr)
 nib.save(img, new_fname)
 
 print(f'Output files are:')
