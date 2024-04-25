@@ -18,57 +18,20 @@ import nibabel as nib
 from nibabel import cifti2
 from fsl.data.cifti import cifti2_axes
 
+import nfact_functions as nf
 # function to load fdt_matrix in dot format and convert to sparse
-def load_dot(f):
-    x = np.loadtxt(f)
-    n_seed=x[-1,0]
-    n_target=x[-1,1]
-    row=x[:-1,0]-1
-    col=x[:-1,1]-1
-    data=x[:-1,2]
-    return sparse.coo_matrix((data, (row, col)), shape=(n_seed.astype(int), n_target.astype(int)))
-
-# load, waytotal normalise, stack and return matrix
-def dotprep(con_left_path, con_right_path, wt_left_path, wt_right_path):
-    con_left = load_dot(con_left_path)
-    waytotal = np.loadtxt(wt_left_path)
-    con_left = con_left.tocsr()
-    con_left.multiply(1e8/waytotal)
-    con_right = load_dot(con_right_path)
-    waytotal = np.loadtxt(wt_right_path)
-    con_right = con_right.tocsr()
-    con_right.multiply(1e8/waytotal)
-    return sparse.vstack([con_left, con_right])
-
-def load_connmat(cm_paths, wt_paths, r_flag):
-    cm_paths = cm_paths.split(",")
-    extension = os.path.splitext(cm_paths[0])[1]
-    wt_paths = wt_paths.split(",")
-    # either .dot with two hemispheres (single-subject)
-    # OR .npz because it is averaged using this package
-    if r_flag == 1:
-        cmat = dotprep(cm_paths[0], cm_paths[1], wt_paths[0], wt_paths[1])
-    elif r_flag == 0:
-        cmat = sparse.load_npz(cm_paths[0])
-    return cmat
-
-def nnls_func(p):
-    comp, rnorm = nnls(p[0], p[1])
-    return comp
 
 
-
-
-out                     = sys.argv[1] # the output directory
-group_gm_path           = sys.argv[2] # the GM components to regress from
-cm_paths                = sys.argv[3] # comma separated connectivity matrices
-seeds                   = sys.argv[4] # comma separated seeds
-rois                    = sys.argv[5] # comma separated ROIs
-waytotal                = sys.argv[6] # comma separated seed coordinates
-tract_coords            = sys.argv[7] # volume coordinates
-lookup                  = sys.argv[8] # volume lookup file
-r_flag                  = int(sys.argv[9]) # group or subject level?
-n_cores                 = int(sys.argv[10]) # the number of cores
+out = sys.argv[1] # the output directory
+group_gm_path = sys.argv[2] # the GM components to regress from
+cm_paths = sys.argv[3] # comma separated connectivity matrices
+seeds = sys.argv[4] # comma separated seeds
+rois = sys.argv[5] # comma separated ROIs
+waytotal = sys.argv[6] # comma separated seed coordinates
+tract_coords = sys.argv[7] # volume coordinates
+lookup = sys.argv[8] # volume lookup file
+r_flag = int(sys.argv[9]) # group or subject level?
+n_cores = int(sys.argv[10]) # the number of cores
 
 # for testing
 # out="/data/Q1200/Diffusion/group1_nfact"
@@ -106,7 +69,7 @@ group_gm = group_gm[roi == 1,:]
 
 # load connectivity matrix that we are regressing to
 print("Loading data...")
-connectivity_matrix = load_connmat(cm_paths, waytotal, r_flag)
+connectivity_matrix = nf.load_connmat(cm_paths, waytotal, r_flag)
 connectivity_matrix = connectivity_matrix.toarray()
 
 n_components = group_gm.shape[1]
@@ -141,14 +104,14 @@ else:
     p = multiprocessing.Pool(processes=n_cores)
 
     print('WM (voxel) regression')
-    H_list = p.imap(nnls_func, inputlist, chunksize=chunksize)
+    H_list = p.imap(nf.nnls_func, inputlist, chunksize=chunksize)
     H_list = list(H_list)
     for i in range(n_voxels):
         H[:,i] = H_list[i]
 
     print('GM (vertex) regression')
     inputlist = [[H.T, connectivity_matrix.T[:,j]] for j in range(n_vertices)]
-    W_list = p.imap(nnls_func, inputlist, chunksize=chunksize)
+    W_list = p.imap(nf.nnls_func, inputlist, chunksize=chunksize)
 
     p.close()
     p.join()

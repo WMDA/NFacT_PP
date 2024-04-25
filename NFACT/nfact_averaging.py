@@ -10,6 +10,7 @@ import shutil
 import numpy as np
 from scipy import sparse
 from progressbar import progressbar
+import nfact_functions as nf
 
 subject_list_path = sys.argv[1] # the subject list
 ptx_folder = sys.argv[2] # the example comma separated ptx_folders
@@ -25,45 +26,6 @@ print('Averaging connectivity matrices')
 subject_list_nmf = np.loadtxt(subject_list_path, dtype='str')
 ptx_folder = ptx_folder.split(",")
 
-def load_dot(file_path: str) -> object:
-    '''
-    Function to convert fdt_matrix in dot format
-    to sparse matrix
-
-    Parameters
-    ----------
-    file_path: str
-        string of file path to fdt matrix
-
-    Returns
-    -------
-    A sparse matrix in co-ordinate format
-    '''
-    x = np.loadtxt(file_path)
-    n_seed = x[-1,0]
-    n_target = x[-1,1]
-    row = x[:-1,0]-1
-    col = x[:-1,1]-1
-    data = x[:-1,2]
-    return sparse.coo_matrix((data, (row, col)), shape=(n_seed.astype(int), n_target.astype(int)))
-
-# load, waytotal normalise, stack and return matrix
-def dotprep(dir_left, dir_right):
-    con_left = load_dot(os.path.join(dir_left, 'fdt_matrix2.dot'))
-    waytotal = np.loadtxt(os.path.join(dir_left, 'waytotal'))
-    con_left = con_left.tocsr()
-    con_left.multiply(1e8/waytotal)
-    con_right = load_dot(os.path.join(dir_right, 'fdt_matrix2.dot'))
-    waytotal = np.loadtxt(os.path.join(dir_right, 'waytotal'))
-    con_right = con_right.tocsr()
-    con_right.multiply(1e8/waytotal)
-    return sparse.vstack([con_left, con_right])
-
-# function to replace subID and sesID in paths
-def replace_ids(path, id):
-    new_path = path.replace("subid", str(id))
-    return new_path
-
 # loop through subjects:
 #               prep fdt_matrices
 #               average across subjects
@@ -72,7 +34,7 @@ for id in progressbar(subject_list_nmf):
     ptx_path_l = ptx_folder[0].replace("subid", str(id))
     ptx_path_r = ptx_folder[1].replace("subid", str(id))
     # the sudjects waytotal normalised whole-brain connectivity matrix in sparse format
-    cm_csr = dotprep(ptx_path_l, ptx_path_r)
+    cm_csr = nf.dotprep(ptx_path_l, ptx_path_r)
     # initialise average matrix from first dataset
     if COUNTER == 0:
         average_cm = cm_csr
