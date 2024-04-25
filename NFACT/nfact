@@ -26,7 +26,6 @@ run_python(){
 # function to join arguments by comma
 function join_str { local IFS="$1"; shift; echo "$*"; }
 
-
 shopt -s extglob
 
 code_folder="$HOME/scripts_dev/nmf_addon/v0.1/nfact_py"

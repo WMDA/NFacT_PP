@@ -91,6 +91,6 @@ for id in progressbar(subject_list_nmf):
 average_cm = average_cm.multiply(1/COUNTER)
 average_cm_coo = average_cm.tocoo()
 print('Saving average connectivity matrix:')
-fname=os.path.join(out, 'average_matrix2')
+fname = os.path.join(out, 'average_matrix2')
 sparse.save_npz(fname, average_cm.tocoo())
 print(fname)
