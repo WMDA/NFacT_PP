@@ -32,17 +32,6 @@ lookup = sys.argv[8] # volume lookup file
 r_flag = int(sys.argv[9]) # group or subject level?
 n_cores = int(sys.argv[10]) # the number of cores
 
-# for testing
-# out="/data/Q1200/Diffusion/group1_nfact"
-# group_gm_path="/data/Q1200/Diffusion/group1_nfact/NMF_GM_100.LR.dscalar.nii"
-# cm_paths="/data/Q1200/Diffusion/group2_nfact/average_matrix2.npz"
-# seeds="/data/Q1200/Diffusion/group1_nfact/config/L.white.surf.gii,/data/Q1200/Diffusion/group1_nfact/config/R.white.surf.gii"
-# rois="/data/Q1200/Diffusion/group1_nfact/config/L.roi.shape.gii,/data/Q1200/Diffusion/group1_nfact/config/R.roi.shape.gii"
-# waytotal="x"
-# tract_coords="/data/Q1200/Diffusion/group1_nfact/config/tract_space_coords_for_fdt_matrix2"
-# lookup="/data/Q1200/Diffusion/group1_nfact/config/lookup_tractspace_fdt_matrix2.nii.gz"
-# r_flag=0
-
 seeds = seeds.split(",")
 rois = rois.split(",")
 
