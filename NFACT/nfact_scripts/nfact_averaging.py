@@ -9,32 +9,14 @@ import shutil
 import numpy as np
 from scipy import sparse
 from progressbar import progressbar
-import nfact_functions as nf
+import nfact_functions.nfact_functions as nf
+from nfact_functions.args import get_nfact_averaging_args
 
-def get_args() -> dict:
-    '''
-    Function to assign input into a dictionary
 
-    Parameters
-    ----------
-    None
-
-    Returns
-    -------
-    dict: dictionary obj
-       dictionary of subject_list_path,
-       ptx_folder and output_directory
-    '''
-    
-    return {
-    'subject_list_path': sys.argv[1],  # the subject list
-    'ptx_folder': sys.argv[2], # the example comma separated ptx_folders
-    'output_directory': sys.argv[3] # the output directory
-    }
 
 print('Averaging connectivity matrices')
 
-args = get_args()
+args = get_nfact_averaging_args()
 
 subject_list_nmf = np.loadtxt(args['subject_list_path'], dtype='str')
 ptx_folder = args['ptx_folder'].split(",")
