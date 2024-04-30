@@ -30,7 +30,10 @@ def load_dot(file_path: str) -> object:
     return sparse.coo_matrix((data, (row, col)), shape=(n_seed.astype(int), n_target.astype(int)))
 
 # load, waytotal normalise, stack and return matrix
-def dotprep(dir_left, dir_right):
+def dotprep(dir_left: str, dir_right: str) -> object:
+    """
+    
+    """
     con_left = load_dot(os.path.join(dir_left, 'fdt_matrix2.dot'))
     waytotal = np.loadtxt(os.path.join(dir_left, 'waytotal'))
     con_left = con_left.tocsr()

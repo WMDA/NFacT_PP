@@ -120,7 +120,6 @@ else:
 
     W = W.T
 
-
 end = time.time()
 print(end-start)
 

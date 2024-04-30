@@ -25,17 +25,6 @@ tract_coords = sys.argv[7] # volume coordinates
 lookup = sys.argv[8] # volume lookup file
 r_flag = int(sys.argv[9]) # volume lookup file
 
-# for testing
-# out="/data/Q1200/Diffusion/nfact"
-# n_components=100
-# cm_paths="/data/Q1200/Diffusion/nfact/average_matrix2.npz"
-# seeds="/data/Q1200/Diffusion/nfact/config/L.white.surf.gii,/data/Q1200/Diffusion/nfact/config/R.white.surf.gii"
-# rois="/data/Q1200/Diffusion/nfact/config/L.roi.shape.gii,/data/Q1200/Diffusion/nfact/config/R.roi.shape.gii"
-# waytotal="x"
-# tract_coords="/data/Q1200/Diffusion/nfact/config/tract_space_coords_for_fdt_matrix2"
-# lookup="/data/Q1200/Diffusion/nfact/config/lookup_tractspace_fdt_matrix2.nii.gz"
-# r_flag=0
-
 seeds = seeds.split(",")
 rois = rois.split(",")
 # surf_coords = surf_coords.split(",")
