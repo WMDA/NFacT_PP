@@ -1,1 +1,1 @@
-from nfact_functions import *
+from nfact_functions.nfact_functions import *

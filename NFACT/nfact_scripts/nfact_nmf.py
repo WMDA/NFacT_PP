@@ -15,6 +15,7 @@ from nibabel import cifti2
 from fsl.data.cifti import cifti2_axes
 import nfact_functions as nf
 
+
 out = sys.argv[1] # the output directory
 n_components = int(sys.argv[2]) # model order for the decomposition
 cm_paths = sys.argv[3] # comma separated connectivity matrices

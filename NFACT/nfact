@@ -190,7 +190,7 @@ fi
 commands=$out/command.txt
 rm -rf $commands
 
-cmd="$code_folder/nfact_nmf.py $out $n_components $cm_paths"
+cmd="$code_folder/nfact_scripts/nfact_nmf.py $out $n_components $cm_paths"
 cmd="$cmd $seeds $rois $waytotal $tract_coords $lookup $r_flag"
 echo $cmd >> $commands
 chmod +x $commands
@@ -211,12 +211,12 @@ else
   mem=30000
 fi
 # Currently used for debugging
-echo 'cmd' $cmd
-echo $seeds
-echo $rois
-echo $waytotal
-echo $tract_coords
-echo $lookup
-echo $r_flag
-exit
+#echo 'cmd' $cmd
+#echo $seeds
+#echo $rois
+#echo $waytotal
+#echo $tract_coords
+#echo $lookup
+#echo $r_flag
+#exit
 run_python $commands $out $time $mem
