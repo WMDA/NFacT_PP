@@ -190,7 +190,7 @@ fi
 commands=$out/command.txt
 rm -rf $commands
 
-cmd="$code_folder/nfact_scripts/nfact_nmf.py $out $n_components $cm_paths"
+cmd="python3 $code_folder/nfact_scripts/nfact_nmf.py $out $n_components $cm_paths"
 cmd="$cmd $seeds $rois $waytotal $tract_coords $lookup $r_flag"
 echo $cmd >> $commands
 chmod +x $commands
