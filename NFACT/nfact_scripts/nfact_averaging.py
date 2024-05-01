@@ -9,7 +9,7 @@ import shutil
 import numpy as np
 from scipy import sparse
 from progressbar import progressbar
-import nfact_functions.nfact_functions as nf
+import nfact_functions.data_functions as nf
 from nfact_functions.args import get_nfact_averaging_args
 
 

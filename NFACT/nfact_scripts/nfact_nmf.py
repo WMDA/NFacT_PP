@@ -13,8 +13,8 @@ from sklearn.decomposition import NMF as nmf
 import nibabel as nib
 from nibabel import cifti2
 from fsl.data.cifti import cifti2_axes
-#import nfact_functions.data_functions as nf
 import NFACT.nfact_functions.data_functions as nf
+import NFACT.nfact_functions.args as nag
 
 
 out = sys.argv[1] # the output directory
