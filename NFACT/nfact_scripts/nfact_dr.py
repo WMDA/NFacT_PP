@@ -17,7 +17,7 @@ import time
 import nibabel as nib
 from nibabel import cifti2
 from fsl.data.cifti import cifti2_axes
-import nfact_functions.nfact_functions as nf
+import nfact_functions.data_functions as nf
 # function to load fdt_matrix in dot format and convert to sparse
 
 
