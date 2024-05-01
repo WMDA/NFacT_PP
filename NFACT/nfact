@@ -28,7 +28,7 @@ function join_str { local IFS="$1"; shift; echo "$*"; }
 
 shopt -s extglob
 
-code_folder="$HOME/scripts_dev/nmf_addon/v0.1/nfact_py"
+code_folder=$PWD
 
 Splash (){
 cat <<EOF
@@ -190,7 +190,7 @@ fi
 commands=$out/command.txt
 rm -rf $commands
 
-cmd="$code_folder/nfact_nmf $out $n_components $cm_paths"
+cmd="$code_folder/nfact_nmf.py $out $n_components $cm_paths"
 cmd="$cmd $seeds $rois $waytotal $tract_coords $lookup $r_flag"
 echo $cmd >> $commands
 chmod +x $commands

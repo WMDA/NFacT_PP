@@ -1,0 +1,35 @@
+/Users/mszdjh3/scripts_dev/nmf_addon/v0.1/nfact_py/nfact_nmf 
+/Users/mszdjh3/tutorial_data/test_sub/downsampled 100 
+/Users/mszdjh3/tutorial_data/test_sub/downsampled/omatrix2/omatrix2_sub-CC00179XX15_ses-58800_std40w_left_white.10k/fdt_matrix2.dot,
+/Users/mszdjh3/tutorial_data/test_sub/downsampled/omatrix2/omatrix2_sub-CC00179XX15_ses-58800_std40w_right_white.10k/fdt_matrix2.dot 
+/Users/mszdjh3/tutorial_data/test_sub/downsampled/sub-CC00179XX15_ses-58800_std40w_left_white.10k.surf.gii,
+/Users/mszdjh3/tutorial_data/test_sub/downsampled/sub-CC00179XX15_ses-58800_std40w_right_white.10k.surf.gii 
+/Users/mszdjh3/tutorial_data/test_sub/downsampled/week40.L.atlasroi.10k.inv.func.gii,
+/Users/mszdjh3/tutorial_data/test_sub/downsampled/week40.R.atlasroi.10k.inv.func.gii 
+/Users/mszdjh3/tutorial_data/test_sub/downsampled/omatrix2/omatrix2_sub-CC00179XX15_ses-58800_std40w_left_white.10k/waytotal,
+/Users/mszdjh3/tutorial_data/test_sub/downsampled/omatrix2/omatrix2_sub-CC00179XX15_ses-58800_std40w_right_white.10k/waytotal 
+/Users/mszdjh3/tutorial_data/test_sub/downsampled/omatrix2/omatrix2_sub-CC00179XX15_ses-58800_std40w_right_white.10k/tract_space_coords_for_fdt_matrix2 
+/Users/mszdjh3/tutorial_data/test_sub/downsampled/omatrix2/omatrix2_sub-CC00179XX15_ses-58800_std40w_right_white.10k/lookup_tractspace_fdt_matrix2.nii.gz 1
+
+
+-sub_dir /Users/mszdjh3/tutorial_data/test_sub/downsampled -seeds /Users/mszdjh3/tutorial_data/test_sub/downsampled/sub-CC00179XX15_ses-58800_std40w_left_white.10k.surf.gii /Users/mszdjh3/tutorial_data/test_sub/downsampled/sub-CC00179XX15_ses-58800_std40w_right_white.10k.surf.gii -rois /Users/mszdjh3/tutorial_data/test_sub/downsampled/week40.L.atlasroi.10k.inv.func.gii /Users/mszdjh3/tutorial_data/test_sub/downsampled/week40.R.atlasroi.10k.inv.func.gii
+./nfact -sub_dir /Users/mszdjh3/tutorial_data/test_sub/downsampled -seeds /Users/mszdjh3/tutorial_data/test_sub/downsampled/sub-CC00179XX15_ses-58800_std40w_left_white.10k.surf.gii /Users/mszdjh3/tutorial_data/test_sub/downsampled/sub-CC00179XX15_ses-58800_std40w_right_white.10k.surf.gii -rois /Users/mszdjh3/tutorial_data/test_sub/downsampled/sub-CC00179XX15_ses-58800_std40w_left_pial.10k.surf.gii /Users/mszdjh3/tutorial_data/test_sub/downsampled/sub-CC00179XX15_ses-58800_std40w_right_pial.10k.surf.gii
+
+
+THINGS TO DO:
+1) Make code more dynamic for folder names
+2)Make it more initiative
+
+nfact_nmf 
+/data/Q1200/Diffusion/100307/nfact 100 
+/data/Q1200/Diffusion/100307/nfact/omatrix2/omatrix2_L.white.resampled_fs_LR/fdt_matrix2.dot,
+/data/Q1200/Diffusion/100307/nfact/omatrix2/omatrix2_R.white.resampled_fs_LR/fdt_matrix2.dot 
+
+/data/Q1200/Diffusion/100307/nfact/L.white.resampled_fs_LR.surf.gii,
+/data/Q1200/Diffusion/100307/nfact/R.white.resampled_fs_LR.surf.gii 
+/data/Q1200/Diffusion/100307/nfact/L.atlasroi.resampled_fs_LR.shape.gii,
+/data/Q1200/Diffusion/100307/nfact/R.atlasroi.resampled_fs_LR.shape.gii 
+/data/Q1200/Diffusion/100307/nfact/omatrix2/omatrix2_L.white.resampled_fs_LR/waytotal,
+/data/Q1200/Diffusion/100307/nfact/omatrix2/omatrix2_R.white.resampled_fs_LR/waytotal 
+/data/Q1200/Diffusion/100307/nfact/omatrix2/omatrix2_R.white.resampled_fs_LR/tract_space_coords_for_fdt_matrix2 
+/data/Q1200/Diffusion/100307/nfact/omatrix2/omatrix2_R.white.resampled_fs_LR/lookup_tractspace_fdt_matrix2.nii.gz 1
