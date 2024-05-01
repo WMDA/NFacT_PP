@@ -44,7 +44,7 @@ connectivity_matrix = connectivity_matrix.toarray()
 
 # apply NMF to connectivity matrix
 print("Running decomposition...")
-model = nmf(n_components=n_components, alpha=alpha, l1_ratio=l1_ratio, init="nndsvd", random_state=1)
+model = nmf(n_components=n_components, alpha_W=alpha, l1_ratio=l1_ratio, init="nndsvd", random_state=1)
 W = model.fit_transform(connectivity_matrix) # the GM surface data
 H = model.components_ # the WM volume data
 
