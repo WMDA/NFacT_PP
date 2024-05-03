@@ -29,7 +29,7 @@ function join_str { local IFS="$1"; shift; echo "$*"; }
 
 shopt -s extglob
 
-code_folder="$HOME/NFacT/NFACT"
+code_folder="$HOME/scripts_dev/nmf_addon/v0.1/nfact_py"
 
 Splash (){
 cat <<EOF
@@ -246,7 +246,7 @@ fi
 commands=$out/dualregress_command.txt
 rm -rf $commands
 
-cmd="$code_folder/nfact_dr.py $out $gm_comps $cm_paths"
+cmd="$code_folder/nfact_dr $out $gm_comps $cm_paths"
 cmd="$cmd $seeds $rois $waytotal $tract_coords $lookup $r_flag $n_cores"
 echo $cmd >> $commands
 chmod +x $commands

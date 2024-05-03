@@ -33,3 +33,6 @@ nfact_nmf
 /data/Q1200/Diffusion/100307/nfact/omatrix2/omatrix2_R.white.resampled_fs_LR/waytotal 
 /data/Q1200/Diffusion/100307/nfact/omatrix2/omatrix2_R.white.resampled_fs_LR/tract_space_coords_for_fdt_matrix2 
 /data/Q1200/Diffusion/100307/nfact/omatrix2/omatrix2_R.white.resampled_fs_LR/lookup_tractspace_fdt_matrix2.nii.gz 1
+
+
+./nfact_preproc -study /home/mszdjh3/for_axon -subject_list /home/mszdjh3/for_axon/sub_list -bpx Diffusion.bedpostX -seeds L.white.32k_fs_LR.surf.gii R.white.32k_fs_LR.surf.gii -warps standard2acpc_dc.nii.gz acpc_dc2standard.nii.gz -ref /usr/local/fsl/6.0.7.x/data/standard/MNI152_T1_2mm_brain.nii.gz -rois L.atlasroi.32k_fs_LR.shape.gii R.atlasroi.32k_fs_LR.shape.gii

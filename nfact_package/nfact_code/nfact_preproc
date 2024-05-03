@@ -28,8 +28,8 @@ function join_str { local IFS="$1"; shift; echo "$*"; }
 
 shopt -s extglob
 
-code_folder="$HOME/NFacT/NFACT"
-blueprint_code_folder="$HOME/NFacT/nfact_package/xtract_blueprint"
+code_folder="$HOME/scripts_dev/nmf_addon/v0.1/nfact_py"
+blueprint_code_folder="$HOME/scripts_dev/xtract_blueprint"
 
 Splash (){
 cat <<EOF
@@ -45,6 +45,7 @@ cat <<EOF
 EOF
 }
 Splash
+
 
 
 Usage() {
@@ -292,7 +293,7 @@ for id in `cat $subject_list`; do
     jobid=`echo -e $jobid | awk '{print $NF}'`
     wait_ids="$wait_ids $jobid"
   else
-    sh $blueprint_code_folder/xtract_blueprint $args
+    ${blueprint_code_folder}/xtract_blueprint $args
   fi
   COUNTER=$((COUNTER+1))
 done
@@ -331,7 +332,7 @@ if [ "$no_average" -eq 0 ]; then
   commands=$nfact_out/average_matrix2_command.txt
   rm -rf $commands
 
-  cmd="$code_folder/nfact_averaging.py $subject_list $ptx_folders $nfact_out"
+  cmd="$code_folder/nfact_averaging $subject_list $ptx_folders $nfact_out"
   echo $cmd >> $commands
   chmod +x $commands
 
