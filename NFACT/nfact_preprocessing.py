@@ -24,6 +24,12 @@ def args() -> dict:
     return vars(option.parse_args())
 
 
+
+
+
+
+
+
 def splash() -> str:
     """
     Function to return NFACT splash
