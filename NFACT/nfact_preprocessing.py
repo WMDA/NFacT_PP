@@ -16,18 +16,11 @@ def args() -> dict:
         dict of arguments
     """
     option = argparse.ArgumentParser()
-    option.add_argument(
-        "-s"
-        "--study_folder"
-        "helllllllllllllllldfdfdfdfdfdfdfdflldfdfdfddfdfdfdfdfdfdfdfddfdfll"
+    option.add_argument("-s" ,
+                        "--study_folder",
+                        dest='study_folder'
     )
     return vars(option.parse_args())
-
-
-
-
-
-
 
 
 def splash() -> str:
