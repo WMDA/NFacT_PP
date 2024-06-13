@@ -165,3 +165,4 @@ data
 data/*
 test*
 *test
+.ruff_cache

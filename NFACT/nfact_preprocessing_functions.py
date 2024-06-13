@@ -227,18 +227,14 @@ def list_of_subjects_from_directory(study_folder: str) -> list:
 
 
 def check_compulsory_files_exist(
-    sub_path: str, 
-    seeds: list, 
-    roi: list, 
-    bedpost: str, 
-    warps: list
+    sub_path: str, seeds: list, roi: list, bedpost: str, warps: list
 ) -> dict:
     """
     Function to check if complusory files
     exist.
 
     Parameters
-    ---------- 
+    ----------
     sub_path: str
         path to subjects directory
     seeds: list

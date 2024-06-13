@@ -186,6 +186,7 @@ if [ ! -f $ref ];then
   errflag=1
 fi
 
+
 ########## For each subject, check that files exist before continuing
 for id in `cat $subject_list`; do
   bpx=$study_folder/$id/$bpx_suff
