@@ -26,12 +26,12 @@ def main_nfact_preprocess():
             print("Unable to find list of subjects from directory")
             print("Exiting...")
             exit(1)
-    
+
     if not npf.check_subject_files(arg):
-        print('\nExiting...\n')
+        print("\nExiting...\n")
         exit(1)
-    #print(arg)
-    
+    # print(arg)
+
 
 if __name__ == "__main__":
     main_nfact_preprocess()

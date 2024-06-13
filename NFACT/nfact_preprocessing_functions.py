@@ -1,6 +1,7 @@
 import os
 import glob
 
+
 def colours():
     """
     Function to print out text in colors
@@ -14,10 +15,8 @@ def colours():
     dict: dictionary object
         dictionary of color strings
     """
-    return {
-        'reset': "\033[0;0m",
-        'red': "\033[1;31m" 
-    }
+    return {"reset": "\033[0;0m", "red": "\033[1;31m"}
+
 
 def read_file_to_list(filename: str) -> list:
     """
@@ -38,6 +37,7 @@ def read_file_to_list(filename: str) -> list:
     with open(filename, "r") as file:
         lines = file.readlines()
     return [sub.rstrip() for sub in lines]
+
 
 def directory_contains_subjects(study_folder_path: str) -> bool:
     """
@@ -61,7 +61,8 @@ def directory_contains_subjects(study_folder_path: str) -> bool:
         if os.path.isdir(os.path.join(study_folder_path, direct))
     ]
     if not content:
-        print("Study folder is empty")
+        col = colours()
+        print(f"{col['red']}Study folder is empty{col['reset']}")
         print("Exiting...")
         return False
     return True
@@ -85,7 +86,8 @@ def check_study_folder_is_dir(study_folder_path: str) -> bool:
        returns false
     """
     if not os.path.isdir(study_folder_path):
-        print("Study folder provided is not a directory")
+        col = colours()
+        print(f"{col['red']}Study folder provided is not a directory{col['reset']}")
         print("Exiting...")
         return False
 
@@ -109,7 +111,8 @@ def check_study_folder_exists(study_folder_path: str) -> bool:
        returns false
     """
     if not os.path.exists(study_folder_path):
-        print("Study folder provided doesn't exist")
+        col = colours()
+        print(f"{col['red']}Study folder provided doesn't exist{col['reset']}")
         print("Exiting...")
         return False
 
@@ -161,7 +164,8 @@ def does_list_of_subjects_exist(path_to_list: str) -> bool:
     """
 
     if (not os.path.exists(path_to_list)) or (os.path.isdir(path_to_list)):
-        print("List of subjects doesn't exist.")
+        col = colours()
+        print(f"{col['red']}List of subjects doesn't exist.{col['reset']}")
         print("Exiting...")
         return False
 
@@ -185,8 +189,9 @@ def return_list_of_subjects_from_file(path_to_list: str) -> list:
     # First check that list of subjects is a txt file.
     try:
         if path_to_list.split(".")[1] != "txt":
-            print("""List of subjects is not ascii file. 
-                  Please specify a list of subject or remove flag""")
+            col = colours()
+            print(f"""{col['red']}List of subjects is not ascii file. 
+                  Please specify a list of subject or remove flag.{col['reset']}""")
             print("Exiting...")
             return None
     # Hacky way to allow sub list not to have an extension
@@ -196,7 +201,8 @@ def return_list_of_subjects_from_file(path_to_list: str) -> list:
     try:
         list_of_subjects = read_file_to_list(path_to_list)
     except Exception as e:
-        print(f"Unable to open subject list due to: {e}")
+        col = colours()
+        print(f"{col['red']}Unable to open subject list due to: {e}{col['reset']}")
 
     return list_of_subjects
 
@@ -220,18 +226,40 @@ def list_of_subjects_from_directory(study_folder: str) -> list:
     return [direct for direct in list_of_subject if os.path.isdir(direct)]
 
 
-def check_compulsory_files_exist(sub_path: str,
-                                 seeds: list,
-                                 roi: list,
-                                 bedpost: str,
-                                 warps: list):
+def check_compulsory_files_exist(
+    sub_path: str, 
+    seeds: list, 
+    roi: list, 
+    bedpost: str, 
+    warps: list
+) -> dict:
+    """
+    Function to check if complusory files
+    exist.
+
+    Parameters
+    ---------- 
+    sub_path: str
+        path to subjects directory
+    seeds: list
+        name of seed(s) in list format
+    roi: list
+        name of ROIs in list form
+    bedpost: str
+        bedpostx suffix
+    warps: list
+        name of warp files given
+    """
     return {
-        'seed': [os.path.exists(os.path.join(sub_path, seed)) for seed in seeds],
-        'roi': [os.path.exists(os.path.join(sub_path, region_of_interest)) 
-                for region_of_interest in roi],
-        'bedpost': [os.path.exists(os.path.join(sub_path, bedpost))],
-        'warps': [os.path.exists(os.path.join(sub_path, warp)) for warp in warps],
+        "seed": [os.path.exists(os.path.join(sub_path, seed)) for seed in seeds],
+        "roi": [
+            os.path.exists(os.path.join(sub_path, region_of_interest))
+            for region_of_interest in roi
+        ],
+        "bedpost": [os.path.exists(os.path.join(sub_path, bedpost))],
+        "warps": [os.path.exists(os.path.join(sub_path, warp)) for warp in warps],
     }
+
 
 def check_subject_files(arg: dict) -> bool:
     """
@@ -242,26 +270,24 @@ def check_subject_files(arg: dict) -> bool:
     ----------
     arg: dict
         arguments from command line
-    
+
     Returns
     -------
-
-
+    bool: boolean
+        True if all files exist
+        else False and error messages
     """
-    for subject in arg['list_of_subjects']:
+    for subject in arg["list_of_subjects"]:
         do_files_exist = check_compulsory_files_exist(
-            subject, 
-            arg['seed'],
-            arg['rois'],
-            arg['bpx_suffix'],
-            arg['warps']
-            ) 
+            subject, arg["seed"], arg["rois"], arg["bpx_suffix"], arg["warps"]
+        )
         everything_there = True
         for key, value in do_files_exist.items():
             if any(element is False for element in value):
                 sub = os.path.basename(subject)
                 col = colours()
-                print(f'{col["red"]}missing {key} for subject: {sub} in {subject}{col["reset"]}')
+                print(
+                    f'{col["red"]}missing {key} for subject: {sub} in {subject}{col["reset"]}'
+                )
                 everything_there = False
     return everything_there
-        
