@@ -15,9 +15,11 @@ def args() -> dict:
     dict: dictionary object
         dict of arguments
     """
-    option = argparse.ArgumentParser(description=print(splash()), 
-                                     formatter_class=argparse.RawDescriptionHelpFormatter,
-                                     epilog=example_usage())
+    option = argparse.ArgumentParser(
+        description=print(splash()),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=example_usage(),
+    )
     option.add_argument(
         "-f",
         "--study_folder",
@@ -37,14 +39,15 @@ def args() -> dict:
     option.add_argument(
         "-b",
         "--bpx",
-        dest="path_to_bpx_folder",
-        required=True,
+        dest="bpx_suffix",
+        required=False,
+        default='Diffusion.bedpostX',
         help="The suffix of the bedpoxtX directory (e.g. <study>/<subid>/<bpx>)",
     )
     option.add_argument(
         "-s",
         "--seed",
-        nargs='+',
+        nargs="+",
         dest="seed",
         required=True,
         help="The suffixes of the paths leading to the left and right hemisphere cortical seeds (white-grey boundary GIFTI)",
@@ -53,7 +56,7 @@ def args() -> dict:
         "-r",
         "--rois",
         dest="rois",
-        nargs='+',
+        nargs="+",
         required=True,
         help="The suffixes of the paths leading to the left and right hemisphere medial wall masks (GIFTI)",
     )
@@ -68,7 +71,7 @@ def args() -> dict:
         "-w",
         "--warps",
         dest="warps",
-        nargs='+',
+        nargs="+",
         required=True,
         help="The suffix of the path leading to the transforms between standard space and diffusion space",
     )
@@ -120,6 +123,7 @@ def args() -> dict:
     )
     return vars(option.parse_args())
 
+
 def splash() -> str:
     """
     Function to return NFACT splash
@@ -144,7 +148,8 @@ def splash() -> str:
 
 """
 
-def example_usage() ->str:
+
+def example_usage() -> str:
     """
     Function to return example usage
 
