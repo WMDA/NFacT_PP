@@ -31,6 +31,7 @@ shopt -s extglob
 code_folder="$HOME/NFacT/NFACT"
 blueprint_code_folder="$HOME/NFacT/nfact_package/xtract_blueprint"
 
+# DONE
 Splash (){
 cat <<EOF
 
@@ -46,7 +47,7 @@ EOF
 }
 Splash
 
-
+# DONE
 Usage() {
     cat << EOF
 
@@ -92,9 +93,9 @@ Example call:
 EOF
     exit 1
 }
-
+# DONE
 [ "$1" = "" ] && Usage
-
+# DONE
 # Set default options
 study_folder=""
 subject_list=""
@@ -112,7 +113,7 @@ gpu=0
 no_average=0
 res=2
 nsamples=1000
-
+# DONE
 # Parse command-line arguments
 while [ ! -z "$1" ];do
     case "$1" in
@@ -133,7 +134,7 @@ while [ ! -z "$1" ];do
     esac
     shift
 done
-
+# DONE but in a lot more detail
 # Check compulsory arguments
 errflag=0
 if [ "$study_folder" == "" ];then

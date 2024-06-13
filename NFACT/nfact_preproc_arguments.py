@@ -41,7 +41,7 @@ def args() -> dict:
         "--bpx",
         dest="bpx_suffix",
         required=False,
-        default='Diffusion.bedpostX',
+        default="Diffusion.bedpostX",
         help="The suffix of the bedpoxtX directory (e.g. <study>/<subid>/<bpx>)",
     )
     option.add_argument(
