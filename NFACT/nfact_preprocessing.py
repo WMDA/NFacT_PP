@@ -1,10 +1,20 @@
 from NFACT.nfact_preproc_arguments import args
 import NFACT.nfact_preprocessing_functions as npf
-import os
-import glob
 
 
-def main_nfact_preprocess():
+
+def main_nfact_preprocess() -> None:
+    """
+    Main function for nfact PP
+
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    None
+    """
     arg = args()
     if not npf.check_study_folder(arg["study_folder"]):
         exit(1)
@@ -30,7 +40,6 @@ def main_nfact_preprocess():
     if not npf.check_subject_files(arg):
         print("\nExiting...\n")
         exit(1)
-    # print(arg)
 
 
 if __name__ == "__main__":
