@@ -1,6 +1,6 @@
 import os
 import glob
-
+import pathlib
 
 def colours():
     """
@@ -16,7 +16,6 @@ def colours():
         dictionary of color strings
     """
     return {"reset": "\033[0;0m", "red": "\033[1;31m"}
-
 
 def read_file_to_list(filename: str) -> list:
     """
@@ -279,6 +278,7 @@ def check_subject_files(arg: dict) -> bool:
         )
         everything_there = True
         for key, value in do_files_exist.items():
+
             if any(element is False for element in value):
                 sub = os.path.basename(subject)
                 col = colours()
@@ -286,4 +286,45 @@ def check_subject_files(arg: dict) -> bool:
                     f'{col["red"]}missing {key} for subject: {sub} in {subject}{col["reset"]}'
                 )
                 everything_there = False
+            if everything_there:
+                # Added this here to stop repatedly looping over subjects
+                imaging_files = image_check(subject, arg["seed"], arg["rois"], arg["warps"])
+                for key, value in imaging_files.items():
+                    if any(element is False for element in value):
+                        everything_there = False
+
     return everything_there
+
+def check_files_are_imaging_files(path):
+    """
+    Function to check that imaging files
+    are actually imaging files.
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+    bool: boolean
+       True if files are else returns
+       False with error messages
+    """
+    accepted_extenions = ['.gii', '.nii']
+    file_extensions = pathlib.Path(path).suffixes
+    if [file for file in file_extensions if file in accepted_extenions]:
+        return True
+    col = colours()
+    file = os.path.basename(path)
+    sub = os.path.basename(os.path.dirname(path))
+    print(f'{col["red"]}{file} for {sub} is an incorrect file type (not gii or nii).{col["reset"]}')
+    return False
+
+def image_check(sub_path, seeds, roi, warps):
+    return {
+        "seed": [check_files_are_imaging_files(os.path.join(sub_path, seed)) for seed in seeds],
+        "roi": [
+            check_files_are_imaging_files(os.path.join(sub_path, region_of_interest))
+            for region_of_interest in roi
+        ],
+        "warps": [check_files_are_imaging_files(os.path.join(sub_path, warp)) for warp in warps],
+    }
