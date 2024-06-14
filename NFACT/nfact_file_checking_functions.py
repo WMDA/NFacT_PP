@@ -249,7 +249,7 @@ def check_compulsory_files_exist(
 
     Returns
     -------
-    dict: dictionary 
+    dict: dictionary
         dict of if files exist bool
     """
     return {
@@ -331,10 +331,7 @@ def check_files_are_imaging_files(path: str) -> bool:
     return False
 
 
-def image_check(sub_path: str, 
-                seeds: list, 
-                roi: list, 
-                warps: list):
+def image_check(sub_path: str, seeds: list, roi: list, warps: list):
     """
     Function to check that images files given
     are actually imaging files.
@@ -352,7 +349,7 @@ def image_check(sub_path: str,
 
     Returns
     -------
-    dict: dictionary 
+    dict: dictionary
         dict of if files are imaging files bool
     """
     return {
