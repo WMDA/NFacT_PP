@@ -1,25 +1,4 @@
-import os
-
-
-def add_file_path_for_images(arg: dict, sub: str) -> dict:
-    """
-    Function to add file path to
-    images.
-
-    Parameters
-    ----------
-    arg: dict
-        dictionary of arguments from
-        command line
-    sub: str
-        subjects full path
-    """
-    keys = ["seed", "warps", "rois"]
-    image_files = {key: arg[key] for key in keys}
-    for key, value in image_files.items():
-        image_files[key] = [os.path.join(sub, val) for val in value]
-    return image_files
-
+from nfactpp_utils_functions import add_file_path_for_images, write_to_file
 
 def build_xtract_arguments(arg: dict, sub: str) -> list:
     """
@@ -67,29 +46,6 @@ def build_xtract_arguments(arg: dict, sub: str) -> list:
     return [Bargs for Bargs in xtract_Bargs if Bargs]
 
 
-def write_to_file(file_path: str, name: str, text: str) -> bool:
-    """
-    Function to write to file.
-
-    Parameters
-    ----------
-    file_path: str
-        abosulte file path to
-        where file is created
-    name: str
-        name of file
-    text: str
-        string to add to file
-    """
-    try:
-        with open(f"{file_path}/{name}", "w") as file:
-            file.write(text)
-    except Exception as e:
-        print(f"Unable to write to {file_path}/{name} due to :", e)
-        return False
-    return True
-
-
 def write_options_to_file(file_path: str, seed_txt: str):
     """
     Function to write seeds
@@ -110,18 +66,3 @@ def write_options_to_file(file_path: str, seed_txt: str):
     seeds = write_to_file(file_path, "seeds.txt", seed_txt)
     if not seeds:
         return False
-
-def colours():
-    """
-    Function to print out text in colors
-
-    Parameters
-    ----------
-    None
-
-    Returns
-    -------
-    dict: dictionary object
-        dictionary of color strings
-    """
-    return {"reset": "\033[0;0m", "red": "\033[1;31m"}

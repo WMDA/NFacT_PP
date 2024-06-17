@@ -1,27 +1,7 @@
 import os
 import glob
 import pathlib
-from nfactpp_utils import colours
-
-def read_file_to_list(filename: str) -> list:
-    """
-    Function to dump output of file to
-    list format.
-
-    Parameters
-    ----------
-    filename: str
-        path to file
-
-    Returns
-    -------
-    list: list of subjects
-        list of path to subjects directories
-    """
-
-    with open(filename, "r") as file:
-        lines = file.readlines()
-    return [sub.rstrip() for sub in lines]
+from NFACT.nfactpp_utils_functions import colours, read_file_to_list
 
 
 def directory_contains_subjects(study_folder_path: str) -> bool:
@@ -378,23 +358,3 @@ def check_fsl_is_installed():
     return True
 
 
-def make_directory(path: str) -> None:
-    """
-    Function to make a directory
-
-    Parameters
-    ----------
-    path: str
-        string to directory path
-
-    Returns
-    -------
-    None
-    """
-    if not os.path.isdir(path):
-        try:
-            os.mkdir(path)
-        except Exception as e:
-            print(e)
-        return False
-    return True

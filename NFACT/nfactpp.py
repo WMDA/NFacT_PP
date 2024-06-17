@@ -1,6 +1,7 @@
-from NFACT.nfact_preproc_arguments import args
-import NFACT.nfact_file_checking_functions as nff
-from NFACT.nfactpp_run_functions import make_directory, build_xtract_arguments
+from NFACT.nfactpp_argument_functions import args
+import NFACT.nfactpp_check_functions as nff
+from NFACT.nfactpp_utils_functions import make_directory
+from NFACT.nfactpp_build_functions import  build_xtract_arguments
 import os
 import subprocess
 import re
