@@ -5,6 +5,7 @@ import os
 import subprocess
 import re
 
+
 def main_nfact_preprocess() -> None:
     """
     Main function for nfact PP
@@ -42,17 +43,17 @@ def main_nfact_preprocess() -> None:
     if not nff.check_subject_files(arg):
         print("\nExiting...\n")
         exit(1)
-    
+
     if not nff.check_fsl_is_installed():
         print("\nExiting...\n")
         exit(1)
-    
+
     print("Number of subjects: ", len(arg["list_of_subjects"]))
     for sub in arg["list_of_subjects"]:
         print("working on: ", os.path.basename(sub))
-        config_directory_path = os.path.join(sub, '.pp_config')
+        config_directory_path = os.path.join(sub, ".pp_config")
         directory_created = make_directory(config_directory_path)
-        
+
         if not directory_created:
             print("\nExiting...\n")
             exit(1)
@@ -62,15 +63,17 @@ def main_nfact_preprocess() -> None:
         print(command)
 
         try:
-            run = subprocess.run(command, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
+            run = subprocess.run(
+                command, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE
+            )
         except subprocess.CalledProcessError as error:
-            print('Error in calling Xtract blueprint: ', error)
+            print("Error in calling Xtract blueprint: ", error)
             print("\nExiting...\n")
             exit(1)
 
         if run.returncode != 0:
             col = nff.colours()
-            error_code = re.sub(r'.rror:', '', run.stderr.decode("utf-8"))
+            error_code = re.sub(r".rror:", "", run.stderr.decode("utf-8"))
             print(f'{col["red"]}Error in xtract blueprint: {error_code}{col["reset"]}')
             print("\nExiting...\n")
             exit(1)

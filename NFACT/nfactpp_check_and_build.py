@@ -1,23 +1,7 @@
 import os
 import glob
 import pathlib
-
-
-def colours():
-    """
-    Function to print out text in colors
-
-    Parameters
-    ----------
-    None
-
-    Returns
-    -------
-    dict: dictionary object
-        dictionary of color strings
-    """
-    return {"reset": "\033[0;0m", "red": "\033[1;31m"}
-
+from nfactpp_utils import colours
 
 def read_file_to_list(filename: str) -> list:
     """
@@ -367,9 +351,10 @@ def image_check(sub_path: str, seeds: list, roi: list, warps: list):
         ],
     }
 
+
 def check_fsl_is_installed():
     """
-    Function to check that FSL is 
+    Function to check that FSL is
     installed. Checks for FSLDIR
     in enviormental variables
 
@@ -383,12 +368,15 @@ def check_fsl_is_installed():
         True if installed
         else False with error message.
     """
-    fsl_loaded = os.getenv('FSLDIR')
+    fsl_loaded = os.getenv("FSLDIR")
     if not fsl_loaded:
         col = colours()
-        print(f"""{col['red']}FSLDIR not in path. Check FSL is installed or has been loaded correctly{col['reset']}""")
+        print(
+            f"""{col['red']}FSLDIR not in path. Check FSL is installed or has been loaded correctly{col['reset']}"""
+        )
         return False
     return True
+
 
 def make_directory(path: str) -> None:
     """
@@ -398,15 +386,15 @@ def make_directory(path: str) -> None:
     ----------
     path: str
         string to directory path
-    
+
     Returns
     -------
     None
     """
     if not os.path.isdir(path):
         try:
-           os.mkdir(path)
+            os.mkdir(path)
         except Exception as e:
-           print(e)
-        return False 
-    return True 
+            print(e)
+        return False
+    return True
