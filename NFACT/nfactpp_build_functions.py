@@ -1,5 +1,5 @@
 from nfactpp_utils_functions import add_file_path_for_images, write_to_file
-
+import os
 
 def build_xtract_arguments(arg: dict, sub: str) -> list:
     """
@@ -23,13 +23,15 @@ def build_xtract_arguments(arg: dict, sub: str) -> list:
     seeds = ",".join(images["seed"])
     rois = ",".join(images["rois"])
     gpu = "-gpu" if arg["gpu"] else ""
+    bpx = os.path.join(sub, arg['bpx_suffix'])
+    target_mask = os.path.join(sub, arg['target_mask'])
 
     xtract_Bargs = [
         "xtract_blueprint",
         "-seeds",
         seeds,
         "-bpx",
-        arg["bpx_suffix"],
+        bpx,
         "-rois",
         rois,
         "-warps",
@@ -41,7 +43,10 @@ def build_xtract_arguments(arg: dict, sub: str) -> list:
         "1",
         "-tract_list",
         "null",
+        "-target",
+        target_mask,
         "-xtract",
+
     ]
 
     return [Bargs for Bargs in xtract_Bargs if Bargs]
@@ -67,3 +72,4 @@ def write_options_to_file(file_path: str, seed_txt: str):
     seeds = write_to_file(file_path, "seeds.txt", seed_txt)
     if not seeds:
         return False
+    return True

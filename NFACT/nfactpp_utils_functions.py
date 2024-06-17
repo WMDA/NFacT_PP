@@ -1,5 +1,6 @@
 import os
-
+import signal
+from datetime import datetime
 
 def add_file_path_for_images(arg: dict, sub: str) -> dict:
     """
@@ -44,7 +45,6 @@ def write_to_file(file_path: str, name: str, text: str) -> bool:
     return True
 
 
-
 def colours():
     """
     Function to print out text in colors
@@ -59,6 +59,7 @@ def colours():
         dictionary of color strings
     """
     return {"reset": "\033[0;0m", "red": "\033[1;31m"}
+
 
 def make_directory(path: str) -> None:
     """
@@ -78,8 +79,9 @@ def make_directory(path: str) -> None:
             os.mkdir(path)
         except Exception as e:
             print(e)
-        return False
+            return False
     return True
+
 
 def read_file_to_list(filename: str) -> list:
     """
@@ -101,8 +103,8 @@ def read_file_to_list(filename: str) -> list:
         lines = file.readlines()
     return [sub.rstrip() for sub in lines]
 
-def error_and_exit(bool_statement: bool, 
-          error_message=None):
+
+def error_and_exit(bool_statement: bool, error_message=None):
     """
     Function to exit out of script
     with error message if bool statement
@@ -111,6 +113,55 @@ def error_and_exit(bool_statement: bool,
     if not bool_statement:
         if error_message:
             col = colours()
-            print(col['red']+ error_message + col['reset'])
+            print(col["red"] + error_message + col["reset"])
         print("Exiting...")
         exit(1)
+
+
+
+class Signit_handler:
+  """
+  A signit handler class. Will kill. Exits
+  programme safely.
+  """
+
+  def __init__(self) -> None:
+    self.register_handler()
+
+  def register_handler(self) -> None:
+    """
+    Method to registers the SIGINT handler.
+    """
+    signal.signal(signal.SIGINT, self.handle_sigint)
+
+  def handle_sigint(self, sig, frame) -> None:
+    """
+    Method that handles the SIGINT signal (Ctrl+C)
+
+    Parameters
+    -----------
+    sig: The signal number 
+    frame: The current stack frame
+    """
+    print("\nReceived SIGINT (Ctrl+C). Terminating...")
+    print("Exiting...")
+    exit(0)
+
+def date_for_filename() -> str:
+    """
+    Function to get the 
+    date and time in format
+    useful for a file name.
+
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    str: string
+        string of datetime object
+    """
+    now = datetime.now()
+    return now.strftime("%Y_%m_%d_%H_%M_%S")
+     

@@ -150,7 +150,7 @@ def return_list_of_subjects_from_file(path_to_list: str) -> list:
             col = colours()
             print(f"""{col['red']}List of subjects is not ascii file. 
                   Please specify a list of subject or remove flag.{col['reset']}""")
-            
+
             return None
     # Hacky way to allow sub list not to have an extension
     except IndexError:
@@ -185,7 +185,7 @@ def list_of_subjects_from_directory(study_folder: str) -> list:
 
 
 def check_compulsory_files_exist(
-    sub_path: str, seeds: list, roi: list, bedpost: str, warps: list
+    sub_path: str, seeds: list, roi: list, bedpost: str, warps: list, mask: str
 ) -> dict:
     """
     Function to check if complusory files
@@ -217,6 +217,7 @@ def check_compulsory_files_exist(
         ],
         "bedpost": [os.path.exists(os.path.join(sub_path, bedpost))],
         "warps": [os.path.exists(os.path.join(sub_path, warp)) for warp in warps],
+        "mask": [os.path.exists(os.path.join(sub_path, mask))]
     }
 
 
@@ -238,7 +239,8 @@ def check_subject_files(arg: dict) -> bool:
     """
     for subject in arg["list_of_subjects"]:
         do_files_exist = check_compulsory_files_exist(
-            subject, arg["seed"], arg["rois"], arg["bpx_suffix"], arg["warps"]
+            subject, arg["seed"], arg["rois"], arg["bpx_suffix"], arg["warps"],
+            arg['target_mask']
         )
         everything_there = True
         for key, value in do_files_exist.items():

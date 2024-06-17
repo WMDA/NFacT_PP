@@ -76,6 +76,13 @@ def args() -> dict:
         help="The suffix of the path leading to the transforms between standard space and diffusion space",
     )
     option.add_argument(
+        "-m",
+        "--target_mask",
+        dest="target_mask",
+        required=True,
+        help=" A whole brain/WM binary target mask in the same space as the seeds",
+    )
+    option.add_argument(
         "-p",
         "--prefix",
         dest="prefix",
@@ -102,7 +109,7 @@ def args() -> dict:
         "--gpu",
         dest="gpu",
         required=False,
-        default=False,
+        action='store_true',
         help="Use GPU version",
     )
     option.add_argument(
