@@ -366,3 +366,47 @@ def image_check(sub_path: str, seeds: list, roi: list, warps: list):
             for warp in warps
         ],
     }
+
+def check_fsl_is_installed():
+    """
+    Function to check that FSL is 
+    installed. Checks for FSLDIR
+    in enviormental variables
+
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    bool: boolean
+        True if installed
+        else False with error message.
+    """
+    fsl_loaded = os.getenv('FSLDIR')
+    if not fsl_loaded:
+        col = colours()
+        print(f"""{col['red']}FSLDIR not in path. Check FSL is installed or has been loaded correctly{col['reset']}""")
+        return False
+    return True
+
+def make_directory(path: str) -> None:
+    """
+    Function to make a directory
+
+    Parameters
+    ----------
+    path: str
+        string to directory path
+    
+    Returns
+    -------
+    None
+    """
+    if not os.path.isdir(path):
+        try:
+           os.mkdir(path)
+        except Exception as e:
+           print(e)
+        return False 
+    return True 
