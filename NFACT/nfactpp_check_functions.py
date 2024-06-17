@@ -28,7 +28,6 @@ def directory_contains_subjects(study_folder_path: str) -> bool:
     if not content:
         col = colours()
         print(f"{col['red']}Study folder is empty{col['reset']}")
-        print("Exiting...")
         return False
     return True
 
@@ -53,7 +52,6 @@ def check_study_folder_is_dir(study_folder_path: str) -> bool:
     if not os.path.isdir(study_folder_path):
         col = colours()
         print(f"{col['red']}Study folder provided is not a directory{col['reset']}")
-        print("Exiting...")
         return False
 
     return True
@@ -78,7 +76,6 @@ def check_study_folder_exists(study_folder_path: str) -> bool:
     if not os.path.exists(study_folder_path):
         col = colours()
         print(f"{col['red']}Study folder provided doesn't exist{col['reset']}")
-        print("Exiting...")
         return False
 
     return True
@@ -129,11 +126,7 @@ def does_list_of_subjects_exist(path_to_list: str) -> bool:
     """
 
     if (not os.path.exists(path_to_list)) or (os.path.isdir(path_to_list)):
-        col = colours()
-        print(f"{col['red']}List of subjects doesn't exist.{col['reset']}")
-        print("Exiting...")
         return False
-
     return True
 
 
@@ -157,7 +150,7 @@ def return_list_of_subjects_from_file(path_to_list: str) -> list:
             col = colours()
             print(f"""{col['red']}List of subjects is not ascii file. 
                   Please specify a list of subject or remove flag.{col['reset']}""")
-            print("Exiting...")
+            
             return None
     # Hacky way to allow sub list not to have an extension
     except IndexError:
@@ -350,11 +343,5 @@ def check_fsl_is_installed():
     """
     fsl_loaded = os.getenv("FSLDIR")
     if not fsl_loaded:
-        col = colours()
-        print(
-            f"""{col['red']}FSLDIR not in path. Check FSL is installed or has been loaded correctly{col['reset']}"""
-        )
         return False
     return True
-
-

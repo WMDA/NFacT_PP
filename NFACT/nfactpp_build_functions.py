@@ -1,5 +1,6 @@
 from nfactpp_utils_functions import add_file_path_for_images, write_to_file
 
+
 def build_xtract_arguments(arg: dict, sub: str) -> list:
     """
     Function to build out xtract arguments

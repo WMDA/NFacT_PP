@@ -44,26 +44,6 @@ def write_to_file(file_path: str, name: str, text: str) -> bool:
     return True
 
 
-def write_options_to_file(file_path: str, seed_txt: str):
-    """
-    Function to write seeds
-    and ptx_options to file
-
-    Parmeters
-    ---------
-    file_path: str
-        file path for .PP_config
-        directory
-    seed_txt: str
-        path of string to go into
-        seed directory
-    """
-    ptx_options = write_to_file(file_path, "ptx_options.txt", "--pd")
-    if not ptx_options:
-        return False
-    seeds = write_to_file(file_path, "seeds.txt", seed_txt)
-    if not seeds:
-        return False
 
 def colours():
     """
@@ -120,3 +100,17 @@ def read_file_to_list(filename: str) -> list:
     with open(filename, "r") as file:
         lines = file.readlines()
     return [sub.rstrip() for sub in lines]
+
+def error_and_exit(bool_statement: bool, 
+          error_message=None):
+    """
+    Function to exit out of script
+    with error message if bool statement
+    is false
+    """
+    if not bool_statement:
+        if error_message:
+            col = colours()
+            print(col['red']+ error_message + col['reset'])
+        print("Exiting...")
+        exit(1)
