@@ -1,0 +1,8 @@
+#! bin/bash
+python3 /home/mszdjh3/NFacT/NFACT/nfactpp.py -f /home/mszdjh3/for_axon/nfact_dev \
+ -s L.white.32k_fs_LR.surf.gii R.white.32k_fs_LR.surf.gii \
+ -r L.atlasroi.32k_fs_LR.shape.gii  R.atlasroi.32k_fs_LR.shape.gii \
+ -w standard2acpc_dc.nii.gz acpc_dc2standard.nii.gz \
+ -t $FSLDIR/data/standard/MNI152_T1_2mm_brain.nii.gz \
+ -m wmparc.nii.gz -g -A \
+ -l /home/mszdjh3/for_axon/nfact_dev/sub_list \
