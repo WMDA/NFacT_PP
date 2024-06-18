@@ -1,5 +1,7 @@
 from nfactpp_utils_functions import add_file_path_for_images, write_to_file
 import os
+from scipy import sparse
+import numpy as np
 
 def build_xtract_arguments(arg: dict, sub: str) -> list:
     """
@@ -23,8 +25,8 @@ def build_xtract_arguments(arg: dict, sub: str) -> list:
     seeds = ",".join(images["seed"])
     rois = ",".join(images["rois"])
     gpu = "-gpu" if arg["gpu"] else ""
-    bpx = os.path.join(sub, arg['bpx_suffix'])
-    target_mask = os.path.join(sub, arg['target_mask'])
+    bpx = os.path.join(sub, arg["bpx_suffix"])
+    target_mask = os.path.join(sub, arg["target_mask"])
 
     xtract_Bargs = [
         "xtract_blueprint",
@@ -46,7 +48,6 @@ def build_xtract_arguments(arg: dict, sub: str) -> list:
         "-target",
         target_mask,
         "-xtract",
-
     ]
 
     return [Bargs for Bargs in xtract_Bargs if Bargs]
@@ -73,3 +74,31 @@ def write_options_to_file(file_path: str, seed_txt: str):
     if not seeds:
         return False
     return True
+
+def average_across_hemishperes(left_path: str, 
+                              right_path: str) -> object:
+    """
+    Function to average across hemishperes
+
+    Parameters
+    ----------
+    left_path: str
+        path to left hemishpere 
+    right_path: str
+        path to right hemishpere
+
+    Returns
+    -------
+    sparse.vstack: object
+        a sparse matrix of left
+        and right averaged by waytotal
+
+    """
+    left_hemishphere = np.loadtxt(os.path.join(left_path, 'fdt_matrix2.dot'))
+    left_way_total = np.loadtxt(os.path.join(left_path, 'waytotal'))
+    left_hemishphere_normalised = left_hemishphere * (1e8/left_way_total)
+    right_hemishphere = np.loadtxt(os.path.join(right_path, 'fdt_matrix2.dot'))
+    right_waytotal = np.loadtxt(os.path.join(right_path, 'waytotal'))
+    right_hemishpere_normalised = right_hemishphere * (1e8/right_waytotal) 
+    return np.vstack([left_hemishphere_normalised, right_hemishpere_normalised])
+

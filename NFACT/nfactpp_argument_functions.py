@@ -97,19 +97,19 @@ def args() -> dict:
         help="Path to output folder (default is to create subject-level output under the input subject directory and group-level under the study folder)",
     )
     option.add_argument(
-        "-n",
-        "--no_average",
-        dest="no_average",
+        "-A",
+        "--average",
+        dest="average",
         required=False,
-        default=False,
-        help="Do not perform connectivity matrix averaging - required for NMF (default averages across all subjects)",
+        action="store_true",
+        help="Perform averagng across hemispheres. Useful for next steps in decomp if interested in whole brain tractography.",
     )
     option.add_argument(
         "-g",
         "--gpu",
         dest="gpu",
         required=False,
-        action='store_true',
+        action="store_true",
         help="Use GPU version",
     )
     option.add_argument(

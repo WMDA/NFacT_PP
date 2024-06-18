@@ -2,6 +2,7 @@ import os
 import signal
 from datetime import datetime
 
+
 def add_file_path_for_images(arg: dict, sub: str) -> dict:
     """
     Function to add file path to
@@ -118,38 +119,38 @@ def error_and_exit(bool_statement: bool, error_message=None):
         exit(1)
 
 
-
 class Signit_handler:
-  """
-  A signit handler class. Will kill. Exits
-  programme safely.
-  """
-
-  def __init__(self) -> None:
-    self.register_handler()
-
-  def register_handler(self) -> None:
     """
-    Method to registers the SIGINT handler.
+    A signit handler class. Will kill. Exits
+    programme safely.
     """
-    signal.signal(signal.SIGINT, self.handle_sigint)
 
-  def handle_sigint(self, sig, frame) -> None:
-    """
-    Method that handles the SIGINT signal (Ctrl+C)
+    def __init__(self) -> None:
+        self.register_handler()
 
-    Parameters
-    -----------
-    sig: The signal number 
-    frame: The current stack frame
-    """
-    print("\nReceived SIGINT (Ctrl+C). Terminating...")
-    print("Exiting...")
-    exit(0)
+    def register_handler(self) -> None:
+        """
+        Method to registers the SIGINT handler.
+        """
+        signal.signal(signal.SIGINT, self.handle_sigint)
+
+    def handle_sigint(self, sig, frame) -> None:
+        """
+        Method that handles the SIGINT signal (Ctrl+C)
+
+        Parameters
+        -----------
+        sig: The signal number
+        frame: The current stack frame
+        """
+        print("\nReceived SIGINT (Ctrl+C). Terminating...")
+        print("Exiting...")
+        exit(0)
+
 
 def date_for_filename() -> str:
     """
-    Function to get the 
+    Function to get the
     date and time in format
     useful for a file name.
 
@@ -164,4 +165,3 @@ def date_for_filename() -> str:
     """
     now = datetime.now()
     return now.strftime("%Y_%m_%d_%H_%M_%S")
-     

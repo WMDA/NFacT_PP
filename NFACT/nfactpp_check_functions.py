@@ -217,7 +217,7 @@ def check_compulsory_files_exist(
         ],
         "bedpost": [os.path.exists(os.path.join(sub_path, bedpost))],
         "warps": [os.path.exists(os.path.join(sub_path, warp)) for warp in warps],
-        "mask": [os.path.exists(os.path.join(sub_path, mask))]
+        "mask": [os.path.exists(os.path.join(sub_path, mask))],
     }
 
 
@@ -239,8 +239,12 @@ def check_subject_files(arg: dict) -> bool:
     """
     for subject in arg["list_of_subjects"]:
         do_files_exist = check_compulsory_files_exist(
-            subject, arg["seed"], arg["rois"], arg["bpx_suffix"], arg["warps"],
-            arg['target_mask']
+            subject,
+            arg["seed"],
+            arg["rois"],
+            arg["bpx_suffix"],
+            arg["warps"],
+            arg["target_mask"],
         )
         everything_there = True
         for key, value in do_files_exist.items():
