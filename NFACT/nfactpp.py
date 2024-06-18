@@ -12,8 +12,11 @@ from NFACT.nfactpp_utils_functions import (
     Signit_handler,
     date_for_filename,
 )
-from NFACT.nfactpp_build_functions import build_xtract_arguments, write_options_to_file, average_across_hemishperes
-
+from NFACT.nfactpp_build_functions import (
+    build_xtract_arguments,
+    write_options_to_file,
+    average_across_hemishperes,
+)
 
 
 def main_nfact_preprocess() -> None:
@@ -30,7 +33,7 @@ def main_nfact_preprocess() -> None:
     """
     handler = Signit_handler()
     arg = args()
-    
+
     # Error handling section
     error_and_exit(nff.check_study_folder(arg["study_folder"]))
     if arg["list_of_subjects"]:
@@ -90,12 +93,16 @@ def main_nfact_preprocess() -> None:
             error_code = re.sub(r".rror:", "", run.stderr.decode("utf-8"))
             error_and_exit(False, f"Error in xtract blueprint: {error_code}")
 
-        if arg['average']:
-            left_path = os.path.join(nfactpp_diretory, 'blueprint', 'omatrix2', 'omatrix2_L.white.32k_fs_LR')
-            right_path = os.path.join(nfactpp_diretory, 'blueprint', 'omatrix2', 'omatrix2_R.white.32k_fs_LR')
+        if arg["average"]:
+            left_path = os.path.join(
+                nfactpp_diretory, "blueprint", "omatrix2", "omatrix2_L.white.32k_fs_LR"
+            )
+            right_path = os.path.join(
+                nfactpp_diretory, "blueprint", "omatrix2", "omatrix2_R.white.32k_fs_LR"
+            )
             matrix = average_across_hemishperes(left_path, right_path)
-            save_path_for_matrix = os.path.join(nfactpp_diretory, 'average_matrix2.dot')
-            print(f'Saving matrix to:',  save_path_for_matrix)
+            save_path_for_matrix = os.path.join(nfactpp_diretory, "average_matrix2.dot")
+            print(f"Saving matrix to:", save_path_for_matrix)
             np.savetxt(save_path_for_matrix, matrix)
     print("Finished")
 
