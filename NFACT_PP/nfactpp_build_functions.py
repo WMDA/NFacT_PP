@@ -4,7 +4,7 @@ from scipy import sparse
 import numpy as np
 
 
-def build_xtract_arguments(arg: dict, sub: str) -> list:
+def build_probtrackx2_arguments(arg: dict, sub: str) -> list:
     """
     Function to build out xtract arguments
 
@@ -25,12 +25,12 @@ def build_xtract_arguments(arg: dict, sub: str) -> list:
     images = add_file_path_for_images(arg, sub)
     seeds = ",".join(images["seed"])
     rois = ",".join(images["rois"])
-    gpu = "-gpu" if arg["gpu"] else ""
+    binary = "probtrackx2_gpu" if arg["gpu"] else "probtrackx2"
     bpx = os.path.join(sub, arg["bpx_suffix"])
     target_mask = os.path.join(sub, arg["target_mask"])
 
-    xtract_Bargs = [
-        "xtract_blueprint",
+    probtrackx_args = [
+        binary,
         "-seeds",
         seeds,
         "-bpx",
@@ -41,7 +41,6 @@ def build_xtract_arguments(arg: dict, sub: str) -> list:
         arg["ref"],
         images["warps"][0],
         images["warps"][1],
-        gpu,
         "-stage",
         "1",
         "-tract_list",
@@ -51,7 +50,7 @@ def build_xtract_arguments(arg: dict, sub: str) -> list:
         "-xtract",
     ]
 
-    return [Bargs for Bargs in xtract_Bargs if Bargs]
+    return [Bargs for Bargs in probtrackx_args if Bargs]
 
 
 def write_options_to_file(file_path: str, seed_txt: str):
