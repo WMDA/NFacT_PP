@@ -1,7 +1,7 @@
-from nfactpp_utils_functions import add_file_path_for_images, write_to_file
 import os
-from scipy import sparse
 import numpy as np
+from NFACT_PP.nfactpp_utils_functions import add_file_path_for_images, write_to_file
+
 
 
 def build_probtrackx2_arguments(arg: dict, sub: str) -> list:

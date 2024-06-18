@@ -4,16 +4,16 @@ import re
 import numpy as np
 
 # NFACT functions
-from NFACT.nfactpp_argument_functions import args
-import NFACT.nfactpp_check_functions as nff
-from NFACT.nfactpp_utils_functions import (
+from NFACT_PP.nfactpp_argument_functions import args
+import NFACT_PP.nfactpp_check_functions as nff
+from NFACT_PP.nfactpp_utils_functions import (
     make_directory,
     error_and_exit,
     Signit_handler,
     date_for_filename,
 )
-from NFACT.nfactpp_build_functions import (
-    build_xtract_arguments,
+from NFACT_PP.nfactpp_build_functions import (
+    build_probtrackx2_arguments,
     write_options_to_file,
     average_across_hemishperes,
 )
