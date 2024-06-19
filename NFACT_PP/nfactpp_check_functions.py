@@ -1,7 +1,7 @@
 import os
 import glob
 import pathlib
-from NFACT.nfactpp_utils_functions import colours, read_file_to_list
+from NFACT_PP.nfactpp_utils_functions import colours, read_file_to_list
 
 
 def directory_contains_subjects(study_folder_path: str) -> bool:

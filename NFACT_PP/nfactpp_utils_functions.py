@@ -143,7 +143,7 @@ class Signit_handler:
         sig: The signal number
         frame: The current stack frame
         """
-        print("\nReceived SIGINT (Ctrl+C). Terminating...")
+        print("\nUser killed script (Ctrl+C). Terminating...")
         print("Exiting...")
         exit(0)
 

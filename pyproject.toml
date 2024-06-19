@@ -5,9 +5,9 @@ requires      = ["setuptools>=44.0.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "NFACT"
+name = "NFACT_PP"
 version = "1.0.0"
-description = "NFACT"
+description = "NFACT Pre-processing"
 readme = "README.md"
 license = { file = "LICENSE" }
 classifiers = [
@@ -15,7 +15,7 @@ classifiers = [
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
 ]
-keywords = ["NFACT"]
+keywords = ["NFACT_PP"]
 
 dependencies = [
     'scipy',
@@ -27,3 +27,6 @@ dependencies = [
 
 ]
 requires-python = ">=3.8"
+
+[project.scripts]
+entry_point = "NFACT_PP.nfactapp:main"

@@ -80,7 +80,7 @@ def args() -> dict:
         "--target_mask",
         dest="target_mask",
         required=True,
-        help=" A whole brain/WM binary target mask in the same space as the seeds",
+        help="Bet binary mask file in diffusion space",
     )
     option.add_argument(
         "-p",
