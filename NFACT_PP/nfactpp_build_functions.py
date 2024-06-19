@@ -29,7 +29,7 @@ def build_probtrackx2_arguments(arg: dict, sub: str, output_dir: str) -> list:
     binary = "probtrackx2_gpu" if arg["gpu"] else "probtrackx2"
     # bpx = os.path.join(sub, arg["bpx_suffix"])
     target_mask = os.path.join(sub, arg["target_mask"])
-    mask = os.path.join(sub, 'Diffusion.bedpostx', 'nodif_brain_mask.nii.gz' )
+    mask = os.path.join(sub, "Diffusion.bedpostx", "nodif_brain_mask.nii.gz")
 
     return [
         binary,
