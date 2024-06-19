@@ -32,7 +32,9 @@ def main_nfact_preprocess() -> None:
     """
     handler = Signit_handler()
     arg = args()
-
+    nff.check_arguments(arg)
+    nff.check_surface_arguments(arg['seed'], arg['rois'])
+    
     # Error handling section
     error_and_exit(nff.check_study_folder(arg["study_folder"]))
     if arg["list_of_subjects"]:

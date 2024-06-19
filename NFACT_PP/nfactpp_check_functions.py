@@ -1,7 +1,7 @@
 import os
 import glob
 import pathlib
-from NFACT_PP.nfactpp_utils_functions import colours, read_file_to_list
+from NFACT_PP.nfactpp_utils_functions import colours, read_file_to_list, error_and_exit
 
 
 def directory_contains_subjects(study_folder_path: str) -> bool:
@@ -351,3 +351,50 @@ def check_fsl_is_installed():
     if not fsl_loaded:
         return False
     return True
+
+def check_arguments(arg: dict) -> None:
+    """
+    Function to check that 
+    either  hcp_stream given or 
+    default arguments.
+
+    Parameters
+    ----------
+    arg: dict
+        Command line dictionary
+
+    Returns
+    -------
+    None
+    """
+    keys = ["seed", "warps"]
+    default_arguments = {key: arg[key] for key in keys}
+    if not arg['hcp_stream']: 
+        for key, value in default_arguments.items():
+                error_and_exit(
+                    value, 
+                    f"Missing {key} argument. Please specify or use --hcp_stream"
+                               )
+
+def check_surface_arguments(seed: list, 
+                            roi: list) -> None:
+    """
+    Function to check that is seeds 
+    are surfaces then ROIS are provided.
+
+    Parameters
+    ----------
+    seed: list
+        list of seeds 
+    roi: list
+        list of ROIS
+    
+    Returns
+    -------
+    None
+
+    """
+    extension = [file.split('.')[-1] for file in seed]
+    surface = [file for file in extension if file == 'gii']
+    if surface:
+        error_and_exit(roi, 'Surfaces given as seeds but no ROI. Please provide ROI')
