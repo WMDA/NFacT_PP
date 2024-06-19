@@ -24,12 +24,12 @@ def build_probtrackx2_arguments(arg: dict, sub: str, output_dir: str) -> list:
     """
 
     images = add_file_path_for_images(arg, sub)
-    seeds = os.path.join(output_dir, 'seeds.txt')
+    seeds = os.path.join(output_dir, "seeds.txt")
     rois = ",".join(images["rois"])
     binary = "probtrackx2_gpu" if arg["gpu"] else "probtrackx2"
-    #bpx = os.path.join(sub, arg["bpx_suffix"])
+    # bpx = os.path.join(sub, arg["bpx_suffix"])
     target_mask = os.path.join(sub, arg["target_mask"])
-    mask = os.path.join()
+    mask = os.path.join(sub, 'Diffusion.bedpostx', 'nodif_brain_mask.nii.gz' )
 
     return [
         binary,
@@ -42,16 +42,13 @@ def build_probtrackx2_arguments(arg: dict, sub: str, output_dir: str) -> list:
         f"--invxfm={images['warps'][1]}",
         f"--seedref={arg['ref']}",
         "--omatrix2",
-        f"--target2={target_mask}" 
+        f"--target2={target_mask}",
         "--loopcheck",
         "--forcedir",
         "--opd",
         "--nsamples=1000",
-        "-o",
-        output_dir
+        f"--dir={output_dir}",
     ]
-
-     
 
 
 def write_options_to_file(file_path: str, seed_txt: str):

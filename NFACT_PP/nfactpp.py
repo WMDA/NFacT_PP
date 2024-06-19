@@ -91,5 +91,6 @@ def main_nfact_preprocess() -> None:
 
     print("Finished")
 
+
 if __name__ == "__main__":
     main_nfact_preprocess()
