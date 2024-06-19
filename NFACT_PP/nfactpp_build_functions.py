@@ -3,8 +3,7 @@ import numpy as np
 from NFACT_PP.nfactpp_utils_functions import add_file_path_for_images, write_to_file
 
 
-
-def build_probtrackx2_arguments(arg: dict, sub: str) -> list:
+def build_probtrackx2_arguments(arg: dict, sub: str, output_dir: str) -> list:
     """
     Function to build out xtract arguments
 
@@ -15,42 +14,44 @@ def build_probtrackx2_arguments(arg: dict, sub: str) -> list:
         command line
     sub: str
         subjects full path
+    output_dir: str
+        path to output directory
 
     Returns
     -------
     list: list object
-        list of xtract blueprint arguements
+        list of probtrackx2 arguements
     """
 
     images = add_file_path_for_images(arg, sub)
-    seeds = ",".join(images["seed"])
+    seeds = os.path.join(output_dir, 'seeds.txt')
     rois = ",".join(images["rois"])
     binary = "probtrackx2_gpu" if arg["gpu"] else "probtrackx2"
-    bpx = os.path.join(sub, arg["bpx_suffix"])
+    #bpx = os.path.join(sub, arg["bpx_suffix"])
     target_mask = os.path.join(sub, arg["target_mask"])
+    mask = os.path.join()
 
-    probtrackx_args = [
+    return [
         binary,
-        "-seeds",
+        "-x",
         seeds,
-        "-bpx",
-        bpx,
-        "-rois",
-        rois,
-        "-warps",
-        arg["ref"],
-        images["warps"][0],
-        images["warps"][1],
-        "-stage",
-        "1",
-        "-tract_list",
-        "null",
-        "-target",
-        target_mask,
-        "-xtract",
+        "-s",
+        "merged",
+        f"--mask={mask}",
+        f"--xfm={images['warps'][0]}",
+        f"--invxfm={images['warps'][1]}",
+        f"--seedref={arg['ref']}",
+        "--omatrix2",
+        f"--target2={target_mask}" 
+        "--loopcheck",
+        "--forcedir",
+        "--opd",
+        "--nsamples=1000",
+        "-o",
+        output_dir
     ]
 
-    return [Bargs for Bargs in probtrackx_args if Bargs]
+     
 
 
 def write_options_to_file(file_path: str, seed_txt: str):
@@ -61,43 +62,13 @@ def write_options_to_file(file_path: str, seed_txt: str):
     Parmeters
     ---------
     file_path: str
-        file path for .PP_config
+        file path for nfact_PP
         directory
     seed_txt: str
         path of string to go into
         seed directory
     """
-    ptx_options = write_to_file(file_path, "ptx_options.txt", "--pd")
-    if not ptx_options:
-        return False
     seeds = write_to_file(file_path, "seeds.txt", seed_txt)
     if not seeds:
         return False
     return True
-
-
-def average_across_hemishperes(left_path: str, right_path: str) -> object:
-    """
-    Function to average across hemishperes
-
-    Parameters
-    ----------
-    left_path: str
-        path to left hemishpere
-    right_path: str
-        path to right hemishpere
-
-    Returns
-    -------
-    sparse.vstack: object
-        a sparse matrix of left
-        and right averaged by waytotal
-
-    """
-    left_hemishphere = np.loadtxt(os.path.join(left_path, "fdt_matrix2.dot"))
-    left_way_total = np.loadtxt(os.path.join(left_path, "waytotal"))
-    left_hemishphere_normalised = left_hemishphere * (1e8 / left_way_total)
-    right_hemishphere = np.loadtxt(os.path.join(right_path, "fdt_matrix2.dot"))
-    right_waytotal = np.loadtxt(os.path.join(right_path, "waytotal"))
-    right_hemishpere_normalised = right_hemishphere * (1e8 / right_waytotal)
-    return np.vstack([left_hemishphere_normalised, right_hemishpere_normalised])
