@@ -180,7 +180,7 @@ def list_of_subjects_from_directory(study_folder: str) -> list:
     list: list object
         list of subjects
     """
-    print('Getting list of subjects from directory')
+    print("Getting list of subjects from directory")
     list_of_subject = glob.glob(os.path.join(study_folder, "*"))
     return [direct for direct in list_of_subject if os.path.isdir(direct)]
 
