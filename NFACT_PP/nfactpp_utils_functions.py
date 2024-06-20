@@ -168,52 +168,21 @@ def date_for_filename() -> str:
     return now.strftime("%Y_%m_%d_%H_%M_%S")
 
 
-def hcp_files(list_of_subjects: list) -> dict:
+def get_seeds(sub: str) -> list:
     """
-    Function to return
-    HCP standard seed, ROI
-    and warps. Also checks that they exist
+    Function to get HCP stream seeds
 
     Parameters
     ----------
-    None
-
+    sub: str
+        string of subject
+    
     Returns
     -------
-    dict: dictionary object
-        dict of seeds, ROIS and warps
+    seeds: list
+       list of seeds
     """
-
-    for sub in list_of_subjects:
-        subject = os.path.basename(sub)
-        seeds = glob.glob(
-            os.path.join(
-                sub, f"MNINonLinear/fsaverage_LR32k/*.white.32k_fs_LR.surf.gii"
-            )
-        )
-        seed = [seeds[0], seeds[1]]
-        if not seed:
-            error_and_exit(False, f"Cannot find seed files for {subject}")
-
-        rois = glob.glob(
-            os.path.join(
-                sub, f"MNINonLinear/fsaverage_LR32k/*.atlasroi.32k_fs_LR.shape.gii"
-            )
-        )
-        rois = [rois[0], rois[1]]
-        if not rois:
-            error_and_exit(False, f"Cannot find ROI files for {subject}")
-
-        warp = [
-            os.path.join(sub, "MNINonLinear/xfms/standard2acpc_dc.nii.gz"),
-            os.path.join(sub, "MNINonLinear/xfms/acpc_dc2standard.nii.gz"),
-        ]
-        [
-            error_and_exit(os.path.exists(path), f"Unable to find {path}")
-            for path in warp
-        ]
-    return {
-        "seed": seed,
-        "rois": rois,
-        "warps": warp,
-    }
+    seeds = glob.glob(os.path.join(sub, f"MNINonLinear/fsaverage_LR32k/*.white.32k_fs_LR.surf.gii"))
+    subject = os.path.basename(sub)
+    error_and_exit(seeds, f"Cannot find seed files for {subject}")
+    return seeds

@@ -1,6 +1,7 @@
 import os
-import numpy as np
+import glob
 import subprocess
+
 from NFACT_PP.nfactpp_utils_functions import (
     add_file_path_for_images,
     write_to_file,
@@ -9,7 +10,56 @@ from NFACT_PP.nfactpp_utils_functions import (
 )
 
 
-def proces_command_arguments(arg: dict, sub: str, output_dir: str):
+def hcp_files(sub: str) -> dict:
+    """
+    Function to return
+    HCP standard seed, ROI
+    and warps. Also checks that they exist
+
+    Parameters
+    ----------
+    sub: str
+        string to subjects
+        files
+
+    Returns
+    -------
+    dict: dictionary object
+        dict of seeds, ROIS and warps
+    """
+    
+
+    subject = os.path.basename(sub)
+
+    rois = glob.glob(
+         os.path.join(sub, f"MNINonLinear/fsaverage_LR32k/*.atlasroi.32k_fs_LR.shape.gii"
+         )
+     )
+    rois = [rois[0], rois[1]]
+    if not rois:
+        error_and_exit(False, f"Cannot find ROI files for {subject}")
+    
+    bpx_path = os.path.join(sub, 'T1w/Diffusion.bedpostX')
+    print(bpx_path)
+    error_and_exit(os.path.exists(bpx_path[0]), "Cannot find Diffusion.bedpostX directory")
+    warp = [
+        os.path.join(sub, "MNINonLinear/xfms/standard2acpc_dc.nii.gz"),
+        os.path.join(sub, "MNINonLinear/xfms/acpc_dc2standard.nii.gz"),
+    ]
+    [
+        error_and_exit(os.path.exists(path), f"Unable to find {path}")
+        for path in warp
+    ]
+    return {
+        "seed": os.path.join(sub, 'nfact_pp', "seeds.txt"),
+        "rois": rois,
+        "warps": warp,
+        "bpx_path": bpx_path,
+        'target_mask': None
+    }
+
+
+def process_command_arguments(arg: dict, sub: str, output_dir: str):
     """
     Function to process command line
     arguments
@@ -32,12 +82,12 @@ def proces_command_arguments(arg: dict, sub: str, output_dir: str):
     """
     images = add_file_path_for_images(arg, sub)
     return {
-        "images": images,
+        "rois" : images['rois'],
+        "warps": images['warps'],
         "seed": os.path.join(output_dir, "seeds.txt"),
         "rois": ",".join(images["rois"]),
-        # bpx = os.path.join(sub, arg["bpx_suffix"]),
-        "target_mask": os.path.join(sub, arg["target_mask"]),
-        "mask": os.path.join(sub, "Diffusion.bedpostx", "nodif_brain_mask.nii.gz"),
+        'bpx_path': os.path.join(sub, arg['bpx_path']), 
+        #"target_mask": os.path.join(sub, arg["target_mask"]),
     }
 
 
@@ -62,25 +112,24 @@ def build_probtrackx2_arguments(
     list: list object
         list of probtrackx2 arguements
     """
-    command_arguments = arg
+    if hcp_stream:
+        command_arguments = hcp_files(sub)
     if not hcp_stream:
-        command_arguments = proces_command_arguments(arg, sub, output_dir)
+        command_arguments = process_command_arguments(arg, sub, output_dir)
 
     binary = "probtrackx2_gpu" if arg["gpu"] else "probtrackx2"
-    images = command_arguments["images"]
+    warps = command_arguments["warps"]
     seeds = command_arguments["seed"]
-    mask = command_arguments["mask"]
+    mask = os.path.join(command_arguments["bpx_path"], 'nodif_brain_mask')
     target_mask = command_arguments["target_mask"]
 
     return [
         binary,
-        "-x",
-        seeds,
-        "-s",
-        "merged",
+        "-x", seeds,
+        "-s", command_arguments["bpx_path"],
         f"--mask={mask}",
-        f"--xfm={images['warps'][0]}",
-        f"--invxfm={images['warps'][1]}",
+        f"--xfm={warps[0]}",
+        f"--invxfm={warps[1]}",
         f"--seedref={arg['ref']}",
         "--omatrix2",
         f"--target2={target_mask}",
@@ -143,11 +192,13 @@ def run_probtrackx(nfactpp_diretory: str, command: list) -> None:
         error_and_exit(False, f"Error in {command[0]} please check log files")
 
 
-def get_target2(target_img: str, 
-                output_dir: str, 
-                resolution: str, 
-                reference_img: str,
-                interpolation_straety: str) -> None:
+def get_target2(
+    target_img: str,
+    output_dir: str,
+    resolution: str,
+    reference_img: str,
+    interpolation_straety: str,
+) -> None:
     """
     Function to create target image
 
@@ -159,18 +210,29 @@ def get_target2(target_img: str,
     None
     """
     try:
-        run = subprocess.run(['flirt', 
-                    '-in', target_img, 
-                    '-out', output_dir, 
-                    '-applyisoxfm', str(resolution), 
-                    '-ref', reference_img, 
-                    '-interp', interpolation_straety], 
-                    capture_output=True)
-        
+        run = subprocess.run(
+            [
+                "flirt",
+                "-in",
+                target_img,
+                "-out",
+                output_dir,
+                "-applyisoxfm",
+                str(resolution),
+                "-ref",
+                reference_img,
+                "-interp",
+                interpolation_straety,
+            ],
+            capture_output=True,
+        )
+
     except subprocess.CalledProcessError as error:
         error_and_exit(False, f"Error in calling probtrackx blueprint: {error}")
     except KeyboardInterrupt:
         run.kill()
-    
+
     if run.returncode != 0:
-        error_and_exit(False, f"FSL FLIRT failure due to {run.stderr}. Unable to build target2")
+        error_and_exit(
+            False, f"FSL FLIRT failure due to {run.stderr}. Unable to build target2"
+        )

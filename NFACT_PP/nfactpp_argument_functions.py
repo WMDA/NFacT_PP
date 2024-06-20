@@ -38,9 +38,8 @@ def args() -> dict:
     option.add_argument(
         "-b",
         "--bpx",
-        dest="bpx_suffix",
-        default="Diffusion.bedpostX",
-        help="The suffix of the bedpoxtX directory (e.g. <study>/<subid>/<bpx>)",
+        dest="bpx_path",
+        help="Path to Diffusion.bedpostX directory",
     )
     option.add_argument(
         "-s",
@@ -60,7 +59,7 @@ def args() -> dict:
         "-t",
         "--ref_target",
         dest="ref",
-        help="The full path to the standard space target (e.g. MNI152 brain mask)",
+        help="A whole brain/WM binary target mask in the same space as the seeds",
     )
     option.add_argument(
         "-w",
@@ -68,12 +67,6 @@ def args() -> dict:
         dest="warps",
         nargs="+",
         help="The suffix of the path leading to the transforms between standard space and diffusion space",
-    )
-    option.add_argument(
-        "-m",
-        "--target_mask",
-        dest="target_mask",
-        help="Bet binary mask file in diffusion space",
     )
     option.add_argument(
         "-p",
