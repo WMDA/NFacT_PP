@@ -8,6 +8,7 @@ from NFACT_PP.nfactpp_utils_functions import (
     error_and_exit,
 )
 
+
 def proces_command_arguments(arg: dict, sub: str, output_dir: str):
     """
     Function to process command line
@@ -26,21 +27,23 @@ def proces_command_arguments(arg: dict, sub: str, output_dir: str):
     Returns
     -------
     dict: dictonary oject
-        dict of processed 
+        dict of processed
         command line arguments
     """
     images = add_file_path_for_images(arg, sub)
     return {
-        'images': images,
-        'seed': os.path.join(output_dir, "seeds.txt"),
-        'rois': ",".join(images["rois"]),
+        "images": images,
+        "seed": os.path.join(output_dir, "seeds.txt"),
+        "rois": ",".join(images["rois"]),
         # bpx = os.path.join(sub, arg["bpx_suffix"]),
-        'target_mask': os.path.join(sub, arg["target_mask"]),
-        'mask': os.path.join(sub, "Diffusion.bedpostx", "nodif_brain_mask.nii.gz")
+        "target_mask": os.path.join(sub, arg["target_mask"]),
+        "mask": os.path.join(sub, "Diffusion.bedpostx", "nodif_brain_mask.nii.gz"),
     }
 
 
-def build_probtrackx2_arguments(arg: dict, sub: str, output_dir: str, hcp_stream=False) -> list:
+def build_probtrackx2_arguments(
+    arg: dict, sub: str, output_dir: str, hcp_stream=False
+) -> list:
     """
     Function to build out probtrackx2 arguments
 
@@ -62,12 +65,12 @@ def build_probtrackx2_arguments(arg: dict, sub: str, output_dir: str, hcp_stream
     command_arguments = arg
     if not hcp_stream:
         command_arguments = proces_command_arguments(arg, sub, output_dir)
-    
+
     binary = "probtrackx2_gpu" if arg["gpu"] else "probtrackx2"
-    images = command_arguments['images']
-    seeds = command_arguments['seed']
-    mask = command_arguments['mask']
-    target_mask = command_arguments['target_mask']
+    images = command_arguments["images"]
+    seeds = command_arguments["seed"]
+    mask = command_arguments["mask"]
+    target_mask = command_arguments["target_mask"]
 
     return [
         binary,
@@ -138,3 +141,36 @@ def run_probtrackx(nfactpp_diretory: str, command: list) -> None:
     # Error handling subprocess
     if run.returncode != 0:
         error_and_exit(False, f"Error in {command[0]} please check log files")
+
+
+def get_target2(target_img: str, 
+                output_dir: str, 
+                resolution: str, 
+                reference_img: str,
+                interpolation_straety: str) -> None:
+    """
+    Function to create target image
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+    None
+    """
+    try:
+        run = subprocess.run(['flirt', 
+                    '-in', target_img, 
+                    '-out', output_dir, 
+                    '-applyisoxfm', str(resolution), 
+                    '-ref', reference_img, 
+                    '-interp', interpolation_straety], 
+                    capture_output=True)
+        
+    except subprocess.CalledProcessError as error:
+        error_and_exit(False, f"Error in calling probtrackx blueprint: {error}")
+    except KeyboardInterrupt:
+        run.kill()
+    
+    if run.returncode != 0:
+        error_and_exit(False, f"FSL FLIRT failure due to {run.stderr}. Unable to build target2")

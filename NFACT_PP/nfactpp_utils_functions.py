@@ -3,6 +3,7 @@ import signal
 from datetime import datetime
 import glob
 
+
 def add_file_path_for_images(arg: dict, sub: str) -> dict:
     """
     Function to add file path to
@@ -166,6 +167,7 @@ def date_for_filename() -> str:
     now = datetime.now()
     return now.strftime("%Y_%m_%d_%H_%M_%S")
 
+
 def hcp_files(list_of_subjects: list) -> dict:
     """
     Function to return
@@ -181,23 +183,35 @@ def hcp_files(list_of_subjects: list) -> dict:
     dict: dictionary object
         dict of seeds, ROIS and warps
     """
-    
 
     for sub in list_of_subjects:
         subject = os.path.basename(sub)
-        seeds = glob.glob(os.path.join(sub, f'MNINonLinear/fsaverage_LR32k/*.white.32k_fs_LR.surf.gii'))
+        seeds = glob.glob(
+            os.path.join(
+                sub, f"MNINonLinear/fsaverage_LR32k/*.white.32k_fs_LR.surf.gii"
+            )
+        )
         seed = [seeds[0], seeds[1]]
         if not seed:
             error_and_exit(False, f"Cannot find seed files for {subject}")
-        
-        rois = glob.glob(os.path.join(sub, f'MNINonLinear/fsaverage_LR32k/*.atlasroi.32k_fs_LR.shape.gii'))
+
+        rois = glob.glob(
+            os.path.join(
+                sub, f"MNINonLinear/fsaverage_LR32k/*.atlasroi.32k_fs_LR.shape.gii"
+            )
+        )
         rois = [rois[0], rois[1]]
         if not rois:
             error_and_exit(False, f"Cannot find ROI files for {subject}")
-        
-        warp = [os.path.join(sub, 'MNINonLinear/xfms/standard2acpc_dc.nii.gz'), 
-                os.path.join(sub, 'MNINonLinear/xfms/acpc_dc2standard.nii.gz')]
-        [error_and_exit(os.path.exists(path), f"Unable to find {path}") for path in warp]
+
+        warp = [
+            os.path.join(sub, "MNINonLinear/xfms/standard2acpc_dc.nii.gz"),
+            os.path.join(sub, "MNINonLinear/xfms/acpc_dc2standard.nii.gz"),
+        ]
+        [
+            error_and_exit(os.path.exists(path), f"Unable to find {path}")
+            for path in warp
+        ]
     return {
         "seed": seed,
         "rois": rois,

@@ -3,11 +3,7 @@ import os
 # NFACT functions
 from NFACT_PP.nfactpp_argument_functions import args
 import NFACT_PP.nfactpp_check_functions as nff
-from NFACT_PP.nfactpp_utils_functions import (
-    make_directory,
-    error_and_exit,
-    hcp_files
-)
+from NFACT_PP.nfactpp_utils_functions import make_directory, error_and_exit, hcp_files
 from NFACT_PP.nfactpp_probtrackx_functions import (
     build_probtrackx2_arguments,
     write_options_to_file,
@@ -30,7 +26,6 @@ def main_nfact_preprocess(arg: dict) -> None:
     None
     """
 
-    
     nff.check_surface_arguments(arg["seed"], arg["rois"])
 
     # Error handling section
@@ -44,12 +39,14 @@ def main_nfact_preprocess(arg: dict) -> None:
         nfactpp_diretory = os.path.join(sub, "nfact_pp")
         directory_created = make_directory(nfactpp_diretory)
         error_and_exit(directory_created)
-        seeds_to_write = [os.path.join(arg['study_folder'], seed) for seed in arg["seed"]]
+        seeds_to_write = [
+            os.path.join(arg["study_folder"], seed) for seed in arg["seed"]
+        ]
         seed_text = "\n".join(seeds_to_write)
         files_written = write_options_to_file(nfactpp_diretory, seed_text)
         error_and_exit(files_written)
         command = build_probtrackx2_arguments(arg, sub, nfactpp_diretory)
-        
+
         # Running probtrackx2
         run_probtrackx(nfactpp_diretory, command)
 
@@ -91,11 +88,6 @@ def hcp_stream_main(arg: dict) -> None:
         error_and_exit(files_written)
         command = build_probtrackx2_arguments(arg, sub, nfactpp_diretory)
         print(command)
-
-
-
-
-
 
     print("Finished HCP stream")
     exit(0)
