@@ -393,7 +393,6 @@ def check_surface_arguments(seed: list, roi: list) -> None:
     Returns
     -------
     None
-
     """
     extension = [file.split(".")[-1] for file in seed]
     surface = [file for file in extension if file == "gii"]

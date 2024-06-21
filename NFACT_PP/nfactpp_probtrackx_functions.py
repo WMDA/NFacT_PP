@@ -27,35 +27,34 @@ def hcp_files(sub: str) -> dict:
     dict: dictionary object
         dict of seeds, ROIS and warps
     """
-    
 
     subject = os.path.basename(sub)
 
     rois = glob.glob(
-         os.path.join(sub, f"MNINonLinear/fsaverage_LR32k/*.atlasroi.32k_fs_LR.shape.gii"
-         )
-     )
+        os.path.join(
+            sub, f"MNINonLinear/fsaverage_LR32k/*.atlasroi.32k_fs_LR.shape.gii"
+        )
+    )
     rois = [rois[0], rois[1]]
     if not rois:
         error_and_exit(False, f"Cannot find ROI files for {subject}")
-    
-    bpx_path = os.path.join(sub, 'T1w/Diffusion.bedpostX')
+
+    bpx_path = os.path.join(sub, "T1w/Diffusion.bedpostX")
     print(bpx_path)
-    error_and_exit(os.path.exists(bpx_path[0]), "Cannot find Diffusion.bedpostX directory")
+    error_and_exit(
+        os.path.exists(bpx_path[0]), "Cannot find Diffusion.bedpostX directory"
+    )
     warp = [
         os.path.join(sub, "MNINonLinear/xfms/standard2acpc_dc.nii.gz"),
         os.path.join(sub, "MNINonLinear/xfms/acpc_dc2standard.nii.gz"),
     ]
-    [
-        error_and_exit(os.path.exists(path), f"Unable to find {path}")
-        for path in warp
-    ]
+    [error_and_exit(os.path.exists(path), f"Unable to find {path}") for path in warp]
     return {
-        "seed": os.path.join(sub, 'nfact_pp', "seeds.txt"),
+        "seed": os.path.join(sub, "nfact_pp", "seeds.txt"),
         "rois": rois,
         "warps": warp,
         "bpx_path": bpx_path,
-        'target_mask': None
+        "target_mask": os.path.join(sub, 'nfact_pp', 'target2.nii.gz'),
     }
 
 
@@ -82,12 +81,12 @@ def process_command_arguments(arg: dict, sub: str, output_dir: str):
     """
     images = add_file_path_for_images(arg, sub)
     return {
-        "rois" : images['rois'],
-        "warps": images['warps'],
+        "rois": images["rois"],
+        "warps": images["warps"],
         "seed": os.path.join(output_dir, "seeds.txt"),
         "rois": ",".join(images["rois"]),
-        'bpx_path': os.path.join(sub, arg['bpx_path']), 
-        #"target_mask": os.path.join(sub, arg["target_mask"]),
+        "bpx_path": os.path.join(sub, arg["bpx_path"]),
+        # "target_mask": os.path.join(sub, arg["target_mask"]),
     }
 
 
@@ -120,13 +119,15 @@ def build_probtrackx2_arguments(
     binary = "probtrackx2_gpu" if arg["gpu"] else "probtrackx2"
     warps = command_arguments["warps"]
     seeds = command_arguments["seed"]
-    mask = os.path.join(command_arguments["bpx_path"], 'nodif_brain_mask')
+    mask = os.path.join(command_arguments["bpx_path"], "nodif_brain_mask")
     target_mask = command_arguments["target_mask"]
 
     return [
         binary,
-        "-x", seeds,
-        "-s", command_arguments["bpx_path"],
+        "-x",
+        seeds,
+        "-s",
+        command_arguments["bpx_path"],
         f"--mask={mask}",
         f"--xfm={warps[0]}",
         f"--invxfm={warps[1]}",
@@ -197,13 +198,27 @@ def get_target2(
     output_dir: str,
     resolution: str,
     reference_img: str,
-    interpolation_straety: str,
+    interpolation_strategy: str,
 ) -> None:
     """
-    Function to create target image
-
+    Function to create target2 image
+    
     Parameters
     ----------
+    target_img: str
+        string to target image
+    output: str
+        string to output directory
+    resolution: str
+        resolution of target2
+    reference_img: str
+        reference input
+    interpolation_strategy: str
+        interpolation, either 
+        trilinear, 
+        nearestneighbour,
+        sinc,
+        spline
 
     Returns
     -------
@@ -222,11 +237,42 @@ def get_target2(
                 "-ref",
                 reference_img,
                 "-interp",
-                interpolation_straety,
+                interpolation_strategy,
             ],
             capture_output=True,
         )
 
+    except subprocess.CalledProcessError as error:
+        error_and_exit(False, f"Error in calling probtrackx blueprint: {error}")
+    except KeyboardInterrupt:
+        run.kill()
+
+    if run.returncode != 0:
+        error_and_exit(
+            False, f"FSL FLIRT failure due to {run.stderr}. Unable to build target2"
+        )
+
+def seeds_to_ascii(surfin: str, 
+               roi: str, 
+               surfout: str) -> None:
+    """
+    Function to create seeds from 
+    surfaces.
+
+    Parameters
+    ----------
+    surfin: str
+        input surface
+    roi: str, 
+        medial wall surface
+    surfout: str
+        name of output surface.
+        Needs to be full path
+    """
+    print(f'Converting seed surface {os.path.basename(surfin)} to ASC')
+    try:
+        run = subprocess.run(["surf2surf", '-i', surfin, '-o', surfout, f'--values={roi}', '--outputtype=ASCII'], capture_output=True)
+    
     except subprocess.CalledProcessError as error:
         error_and_exit(False, f"Error in calling probtrackx blueprint: {error}")
     except KeyboardInterrupt:
