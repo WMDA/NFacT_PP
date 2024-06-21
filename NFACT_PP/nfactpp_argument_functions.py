@@ -110,9 +110,9 @@ def args() -> dict:
     )
     option.add_argument(
         "--ptx_options",
-        dest='ptx_options',
-        help='Path to ptx_options file for additional options'
-        default=False
+        dest="ptx_options",
+        help="Path to ptx_options file for additional options",
+        default=False,
     )
     return vars(option.parse_args())
 
