@@ -1,5 +1,4 @@
 import os
-import glob
 import subprocess
 
 from NFACT_PP.nfactpp_utils_functions import (
@@ -28,19 +27,7 @@ def hcp_files(sub: str) -> dict:
         dict of seeds, ROIS and warps
     """
 
-    subject = os.path.basename(sub)
-
-    rois = glob.glob(
-        os.path.join(
-            sub, f"MNINonLinear/fsaverage_LR32k/*.atlasroi.32k_fs_LR.shape.gii"
-        )
-    )
-    rois = [rois[0], rois[1]]
-    if not rois:
-        error_and_exit(False, f"Cannot find ROI files for {subject}")
-
     bpx_path = os.path.join(sub, "T1w/Diffusion.bedpostX")
-    print(bpx_path)
     error_and_exit(
         os.path.exists(bpx_path[0]), "Cannot find Diffusion.bedpostX directory"
     )
@@ -51,27 +38,23 @@ def hcp_files(sub: str) -> dict:
     [error_and_exit(os.path.exists(path), f"Unable to find {path}") for path in warp]
     return {
         "seed": os.path.join(sub, "nfact_pp", "seeds.txt"),
-        "rois": rois,
         "warps": warp,
         "bpx_path": bpx_path,
-        "target_mask": os.path.join(sub, 'nfact_pp', 'target2.nii.gz'),
     }
 
 
-def process_command_arguments(arg: dict, sub: str, output_dir: str):
+def process_command_arguments(arg: dict, sub: str):
     """
     Function to process command line
     arguments
 
     Parameters
     -----------
-        arg: dict
+    arg: dict
         dictionary of arguments from
         command line
     sub: str
         subjects full path
-    output_dir: str
-        path to output directory
 
     Returns
     -------
@@ -81,17 +64,14 @@ def process_command_arguments(arg: dict, sub: str, output_dir: str):
     """
     images = add_file_path_for_images(arg, sub)
     return {
-        "rois": images["rois"],
         "warps": images["warps"],
-        "seed": os.path.join(output_dir, "seeds.txt"),
-        "rois": ",".join(images["rois"]),
+        "seed": os.path.join(sub, 'nfact_pp', "seeds.txt"),
         "bpx_path": os.path.join(sub, arg["bpx_path"]),
-        # "target_mask": os.path.join(sub, arg["target_mask"]),
     }
 
 
 def build_probtrackx2_arguments(
-    arg: dict, sub: str, output_dir: str, hcp_stream=False
+    arg: dict, sub: str, hcp_stream=False
 ) -> list:
     """
     Function to build out probtrackx2 arguments
@@ -114,20 +94,20 @@ def build_probtrackx2_arguments(
     if hcp_stream:
         command_arguments = hcp_files(sub)
     if not hcp_stream:
-        command_arguments = process_command_arguments(arg, sub, output_dir)
+        command_arguments = process_command_arguments(arg, sub)
 
     binary = "probtrackx2_gpu" if arg["gpu"] else "probtrackx2"
     warps = command_arguments["warps"]
     seeds = command_arguments["seed"]
     mask = os.path.join(command_arguments["bpx_path"], "nodif_brain_mask")
-    target_mask = command_arguments["target_mask"]
+    target_mask = os.path.join(sub, 'nfact_pp', 'target2.nii.gz')
+    bpx = os.path.join(command_arguments["bpx_path"], 'merged')
+    output_dir = os.path.join(sub, 'nfact_pp', 'omatrxi2')
 
     return [
         binary,
-        "-x",
-        seeds,
-        "-s",
-        command_arguments["bpx_path"],
+        "-x", seeds,
+        "-s", bpx,
         f"--mask={mask}",
         f"--xfm={warps[0]}",
         f"--invxfm={warps[1]}",
@@ -139,6 +119,7 @@ def build_probtrackx2_arguments(
         "--opd",
         "--nsamples=1000",
         f"--dir={output_dir}",
+        "--pd",
     ]
 
 
@@ -178,7 +159,8 @@ def run_probtrackx(nfactpp_diretory: str, command: list) -> None:
     -------
     None
     """
-
+    
+    print("Running", command[0])
     try:
         log_name = "PP_log_" + date_for_filename()
         with open(os.path.join(nfactpp_diretory, log_name), "w") as log_file:
@@ -202,7 +184,7 @@ def get_target2(
 ) -> None:
     """
     Function to create target2 image
-    
+
     Parameters
     ----------
     target_img: str
@@ -214,8 +196,8 @@ def get_target2(
     reference_img: str
         reference input
     interpolation_strategy: str
-        interpolation, either 
-        trilinear, 
+        interpolation, either
+        trilinear,
         nearestneighbour,
         sinc,
         spline
@@ -224,6 +206,7 @@ def get_target2(
     -------
     None
     """
+    print('Creating target2 image')
     try:
         run = subprocess.run(
             [
@@ -243,7 +226,7 @@ def get_target2(
         )
 
     except subprocess.CalledProcessError as error:
-        error_and_exit(False, f"Error in calling probtrackx blueprint: {error}")
+        error_and_exit(False, f"Error in calling FSL flirt: {error}")
     except KeyboardInterrupt:
         run.kill()
 
@@ -252,33 +235,44 @@ def get_target2(
             False, f"FSL FLIRT failure due to {run.stderr}. Unable to build target2"
         )
 
-def seeds_to_ascii(surfin: str, 
-               roi: str, 
-               surfout: str) -> None:
+
+def seeds_to_ascii(surfin: str, roi: str, surfout: str) -> None:
     """
-    Function to create seeds from 
+    Function to create seeds from
     surfaces.
 
     Parameters
     ----------
     surfin: str
         input surface
-    roi: str, 
+    roi: str,
         medial wall surface
     surfout: str
         name of output surface.
         Needs to be full path
     """
-    print(f'Converting seed surface {os.path.basename(surfin)} to ASC')
+    print(f"Converting seed surface {os.path.basename(surfin)} to ASC")
     try:
-        run = subprocess.run(["surf2surf", '-i', surfin, '-o', surfout, f'--values={roi}', '--outputtype=ASCII'], capture_output=True)
-    
+        run = subprocess.run(
+            [
+                "surf2surf",
+                "-i",
+                surfin,
+                "-o",
+                surfout,
+                f"--values={roi}",
+                "--outputtype=ASCII",
+            ],
+            capture_output=True,
+        )
+
     except subprocess.CalledProcessError as error:
-        error_and_exit(False, f"Error in calling probtrackx blueprint: {error}")
+        error_and_exit(False, f"Error in calling surf2surf: {error}")
     except KeyboardInterrupt:
         run.kill()
 
     if run.returncode != 0:
         error_and_exit(
-            False, f"FSL FLIRT failure due to {run.stderr}. Unable to build target2"
+            False, 
+            f"FSL surf2surf failure due to {run.stderr}. Unable to create asc surface"
         )

@@ -1,14 +1,22 @@
 import os
 import re
+
 # NFACT functions
 import NFACT_PP.nfactpp_check_functions as nff
-from NFACT_PP.nfactpp_utils_functions import make_directory, error_and_exit, hcp_get_seeds, hcp_get_target_image, hcp_get_rois, hcp_reorder_seeds_rois
+from NFACT_PP.nfactpp_utils_functions import (
+    make_directory,
+    error_and_exit,
+    hcp_get_seeds,
+    hcp_get_target_image,
+    hcp_get_rois,
+    hcp_reorder_seeds_rois,
+)
 from NFACT_PP.nfactpp_probtrackx_functions import (
     build_probtrackx2_arguments,
     write_options_to_file,
     run_probtrackx,
     get_target2,
-    seeds_to_ascii
+    seeds_to_ascii,
 )
 
 
@@ -81,28 +89,40 @@ def hcp_stream_main(arg: dict) -> None:
         nfactpp_diretory = os.path.join(sub, "nfact_pp")
         directory_created = make_directory(nfactpp_diretory)
         error_and_exit(directory_created)
-        seeds = hcp_get_seeds(sub)
-        seed_text = "\n".join(seeds)
+        seeds = hcp_get_seeds(sub) 
+        arg["rois"] = hcp_get_rois(sub)
+        arg["mask"] = hcp_get_target_image(sub)
+
+        ordered_by_hemisphere = hcp_reorder_seeds_rois(seeds, arg["rois"])
+        for hemishphere, img in ordered_by_hemisphere.items():
+            seeds_to_ascii(
+                img[0],
+                img[1],
+                os.path.join(
+                    nfactpp_diretory, f"{hemishphere}_white.32k_fs_LR.surf.asc"
+                ),
+            )
+        
+        asc_seeds = [os.path.join(nfactpp_diretory, 'left_white.32k_fs_LR.surf.asc'), 
+                     os.path.join(nfactpp_diretory, 'right_white.32k_fs_LR.surf.asc')]
+        seed_text = "\n".join(asc_seeds)
         files_written = write_options_to_file(nfactpp_diretory, seed_text)
         error_and_exit(files_written)
-        arg['rois'] = hcp_get_rois(sub)
-        arg['ref'] = hcp_get_target_image(sub)
-        
-        ordered_by_hemisphere = hcp_reorder_seeds_rois(seeds,arg['rois'])
-        for hemishphere, img in ordered_by_hemisphere.items():
-            seeds_to_ascii(img[0], 
-                      img[1],
-                      os.path.join(nfactpp_diretory, 
-                                   f'{hemishphere}white.32k_fs_LR.surf.asc'))
-        get_target2(arg['ref'], 
-                    os.path.join(nfactpp_diretory, 'target2'),  
-                    arg['res'], 
-                    arg['ref'], 
-                    'nearestneighbour')
-        command = build_probtrackx2_arguments(
-            arg, sub, nfactpp_diretory, hcp_stream=True
-        )
-        print(command)
 
+        get_target2(
+            arg["mask"],
+            os.path.join(nfactpp_diretory, "target2"),
+            arg["res"],
+            arg["mask"],
+            "nearestneighbour",
+        )
+        command = build_probtrackx2_arguments(
+            arg, sub, hcp_stream=True
+        )
+
+        run_probtrackx(nfactpp_diretory, command)
+        seed_text = "\n".join(seeds)
+        files_written = write_options_to_file(nfactpp_diretory, seed_text)
+        exit(0)
     print("\nFinished HCP stream")
     exit(0)

@@ -28,10 +28,16 @@ def args() -> dict:
         help="Study folder containing sub directories",
     )
     option.add_argument(
+        "-t",
+        "--standard_space",
+        dest="ref",
+        required=True,
+        help="Standard space reference image",
+    )
+    option.add_argument(
         "-l",
         "--list_of_subjects",
         dest="list_of_subjects",
-        default=False,
         help="""A list of subjects in text form. If not provided NFACT PP will use all subjects in the study folder. 
         All subjects need full file path to subjects directory""",
     )
@@ -56,9 +62,9 @@ def args() -> dict:
         help="The suffixes of the paths leading to the left and right hemisphere medial wall masks (GIFTI)",
     )
     option.add_argument(
-        "-t",
-        "--ref_target",
-        dest="ref",
+        "-m",
+        "--mask",
+        dest="mask",
         help="A whole brain/WM binary target mask in the same space as the seeds",
     )
     option.add_argument(
