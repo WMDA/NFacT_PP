@@ -59,7 +59,7 @@ def main_nfact_preprocess(arg: dict) -> None:
         print(command)
 
         # Running probtrackx2
-        #run_probtrackx(nfactpp_diretory, command)
+        run_probtrackx(nfactpp_diretory, command)
 
     print("Finished")
     exit(0)
