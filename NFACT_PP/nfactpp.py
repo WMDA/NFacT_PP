@@ -1,66 +1,45 @@
 import os
-import subprocess
 import re
-import numpy as np
 
 # NFACT functions
-from NFACT_PP.nfactpp_argument_functions import args
 import NFACT_PP.nfactpp_check_functions as nff
 from NFACT_PP.nfactpp_utils_functions import (
     make_directory,
     error_and_exit,
-    Signit_handler,
-    date_for_filename,
+    hcp_get_seeds,
+    hcp_get_target_image,
+    hcp_get_rois,
+    hcp_reorder_seeds_rois,
 )
-from NFACT_PP.nfactpp_build_functions import (
+from NFACT_PP.nfactpp_probtrackx_functions import (
     build_probtrackx2_arguments,
     write_options_to_file,
+    run_probtrackx,
+    get_target2,
+    seeds_to_ascii,
 )
 
 
-def main_nfact_preprocess() -> None:
+def main_nfact_preprocess(arg: dict) -> None:
     """
     Main function for nfact PP
 
     Parameters
     ----------
-    None
+    arg: dict
+       dictionary of command line
+       arguments
 
     Returns
     -------
     None
     """
-    handler = Signit_handler()
-    arg = args()
+
+    nff.check_surface_arguments(arg["seed"], arg["rois"])
 
     # Error handling section
-    error_and_exit(nff.check_study_folder(arg["study_folder"]))
-    if arg["list_of_subjects"]:
-        error_and_exit(
-            nff.does_list_of_subjects_exist(arg["list_of_subjects"]),
-            "List of subjects doesn't exist.",
-        )
-
-        arg["list_of_subjects"] = nff.return_list_of_subjects_from_file(
-            arg["list_of_subjects"]
-        )
-
-        error_and_exit(arg["list_of_subjects"])
-
-    if not arg["list_of_subjects"]:
-        arg["list_of_subjects"] = nff.list_of_subjects_from_directory(
-            arg["study_folder"]
-        )
-
-        error_and_exit(
-            arg["list_of_subjects"], "Unable to find list of subjects from directory"
-        )
 
     error_and_exit(nff.check_subject_files(arg))
-    error_and_exit(
-        nff.check_fsl_is_installed(),
-        "FSLDIR not in path. Check FSL is installed or has been loaded correctly",
-    )
 
     print("Number of subjects: ", len(arg["list_of_subjects"]))
     for sub in arg["list_of_subjects"]:
@@ -69,28 +48,82 @@ def main_nfact_preprocess() -> None:
         nfactpp_diretory = os.path.join(sub, "nfact_pp")
         directory_created = make_directory(nfactpp_diretory)
         error_and_exit(directory_created)
-        seed_text = "\n".join(arg["seed"])
+        seeds_to_write = [
+            os.path.join(arg["study_folder"], seed) for seed in arg["seed"]
+        ]
+        seed_text = "\n".join(seeds_to_write)
         files_written = write_options_to_file(nfactpp_diretory, seed_text)
-        command = build_probtrackx2_arguments(arg, sub, nfactpp_diretory)
         error_and_exit(files_written)
 
-        # Running probtrackx2 blueprint
-        try:
-            log_name = "PP_log_" + date_for_filename()
-            with open(os.path.join(nfactpp_diretory, log_name), "w") as log_file:
-                run = subprocess.run(command, stdout=log_file, stderr=log_file)
-        except subprocess.CalledProcessError as error:
-            error_and_exit(False, f"Error in calling probtrackx blueprint: {error}")
-        except KeyboardInterrupt:
-            run.kill()
-            return None
+        command = build_probtrackx2_arguments(arg, sub, nfactpp_diretory)
+        print(command)
 
-        # Error handling subprocess
-        if run.returncode != 0:
-            error_and_exit(False, f"Error in {command[0]} please check log files")
+        # Running probtrackx2
+        #run_probtrackx(nfactpp_diretory, command)
 
     print("Finished")
+    exit(0)
 
 
-if __name__ == "__main__":
-    main_nfact_preprocess()
+def hcp_stream_main(arg: dict) -> None:
+    """
+    hcp stream main function
+
+    Parameters
+    ----------
+    arg: dict
+       dictionary of command line
+       arguments
+
+    Returns
+    ------
+    None
+
+    """
+
+    print("HCP stream selected")
+
+    print("Number of subjects: ", len(arg["list_of_subjects"]))
+    for sub in arg["list_of_subjects"]:
+        # looping over subjects and building out directories
+        print("\nworking on: ", os.path.basename(sub))
+        nfactpp_diretory = os.path.join(sub, "nfact_pp")
+        directory_created = make_directory(nfactpp_diretory)
+        error_and_exit(directory_created)
+        seeds = hcp_get_seeds(sub)
+        arg["rois"] = hcp_get_rois(sub)
+        arg["mask"] = hcp_get_target_image(sub)
+
+        ordered_by_hemisphere = hcp_reorder_seeds_rois(seeds, arg["rois"])
+        for hemishphere, img in ordered_by_hemisphere.items():
+            seeds_to_ascii(
+                img[0],
+                img[1],
+                os.path.join(
+                    nfactpp_diretory, f"{hemishphere}_white.32k_fs_LR.surf.asc"
+                ),
+            )
+
+        asc_seeds = [
+            os.path.join(nfactpp_diretory, "left_white.32k_fs_LR.surf.asc"),
+            os.path.join(nfactpp_diretory, "right_white.32k_fs_LR.surf.asc"),
+        ]
+        seed_text = "\n".join(asc_seeds)
+        files_written = write_options_to_file(nfactpp_diretory, seed_text)
+        error_and_exit(files_written)
+
+        get_target2(
+            arg["mask"],
+            os.path.join(nfactpp_diretory, "target2"),
+            arg["res"],
+            arg["mask"],
+            "nearestneighbour",
+        )
+        command = build_probtrackx2_arguments(arg, sub, hcp_stream=True)
+
+        run_probtrackx(nfactpp_diretory, command)
+        seed_text = "\n".join(seeds)
+        files_written = write_options_to_file(nfactpp_diretory, seed_text)
+        exit(0)
+    print("\nFinished HCP stream")
+    exit(0)

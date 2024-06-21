@@ -28,28 +28,30 @@ def args() -> dict:
         help="Study folder containing sub directories",
     )
     option.add_argument(
+        "-t",
+        "--standard_space",
+        dest="ref",
+        required=True,
+        help="Standard space reference image",
+    )
+    option.add_argument(
         "-l",
         "--list_of_subjects",
         dest="list_of_subjects",
-        required=False,
-        default=False,
         help="""A list of subjects in text form. If not provided NFACT PP will use all subjects in the study folder. 
         All subjects need full file path to subjects directory""",
     )
     option.add_argument(
         "-b",
         "--bpx",
-        dest="bpx_suffix",
-        required=False,
-        default="Diffusion.bedpostX",
-        help="The suffix of the bedpoxtX directory (e.g. <study>/<subid>/<bpx>)",
+        dest="bpx_path",
+        help="Path to Diffusion.bedpostX directory",
     )
     option.add_argument(
         "-s",
         "--seed",
         nargs="+",
         dest="seed",
-        required=True,
         help="The suffixes of the paths leading to the left and right hemisphere cortical seeds (white-grey boundary GIFTI)",
     )
     option.add_argument(
@@ -57,50 +59,37 @@ def args() -> dict:
         "--rois",
         dest="rois",
         nargs="+",
-        required=True,
         help="The suffixes of the paths leading to the left and right hemisphere medial wall masks (GIFTI)",
     )
     option.add_argument(
-        "-t",
-        "--ref_target",
-        dest="ref",
-        required=True,
-        help="The full path to the standard space target (e.g. MNI152 brain mask)",
+        "-m",
+        "--mask",
+        dest="mask",
+        help="A whole brain/WM binary target mask in the same space as the seeds",
     )
     option.add_argument(
         "-w",
         "--warps",
         dest="warps",
         nargs="+",
-        required=True,
         help="The suffix of the path leading to the transforms between standard space and diffusion space",
-    )
-    option.add_argument(
-        "-m",
-        "--target_mask",
-        dest="target_mask",
-        required=True,
-        help="Bet binary mask file in diffusion space",
     )
     option.add_argument(
         "-p",
         "--prefix",
         dest="prefix",
-        required=False,
         help="Designate a prefix to the group-level output directory name (default directory name: <study>/nfact_group)",
     )
     option.add_argument(
         "-o",
         "--out",
         dest="out",
-        required=False,
         help="Path to output folder (default is to create subject-level output under the input subject directory and group-level under the study folder)",
     )
     option.add_argument(
-        "-A",
-        "--average",
-        dest="average",
-        required=False,
+        "-H",
+        "--hcp_stream",
+        dest="hcp_stream",
         action="store_true",
         help="Perform averagng across hemispheres. Useful for next steps in decomp if interested in whole brain tractography.",
     )
@@ -108,7 +97,6 @@ def args() -> dict:
         "-g",
         "--gpu",
         dest="gpu",
-        required=False,
         action="store_true",
         help="Use GPU version",
     )
@@ -116,7 +104,6 @@ def args() -> dict:
         "-N",
         "--nsamples",
         dest="nsamples",
-        required=False,
         default=1000,
         help="Number of samples per seed used in tractography (default = 1000)",
     )
@@ -124,7 +111,6 @@ def args() -> dict:
         "-R",
         "--res",
         dest="res",
-        required=False,
         default=2,
         help="Resolution of NMF volume components (Default = 2 mm)",
     )
