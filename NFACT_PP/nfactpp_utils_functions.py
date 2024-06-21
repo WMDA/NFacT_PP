@@ -4,26 +4,6 @@ from datetime import datetime
 import glob
 
 
-def add_file_path_for_images(arg: dict, sub: str) -> dict:
-    """
-    Function to add file path to
-    images.
-
-    Parameters
-    ----------
-    arg: dict
-        dictionary of arguments from
-        command line
-    sub: str
-        subjects full path
-    """
-    keys = ["seed", "warps"]
-    image_files = {key: arg[key] for key in keys}
-    for key, value in image_files.items():
-        image_files[key] = [os.path.join(sub, val) for val in value]
-    return image_files
-
-
 def write_to_file(file_path: str, name: str, text: str) -> bool:
     """
     Function to write to file.
