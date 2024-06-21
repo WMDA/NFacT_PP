@@ -65,14 +65,12 @@ def process_command_arguments(arg: dict, sub: str):
     images = add_file_path_for_images(arg, sub)
     return {
         "warps": images["warps"],
-        "seed": os.path.join(sub, 'nfact_pp', "seeds.txt"),
+        "seed": os.path.join(sub, "nfact_pp", "seeds.txt"),
         "bpx_path": os.path.join(sub, arg["bpx_path"]),
     }
 
 
-def build_probtrackx2_arguments(
-    arg: dict, sub: str, hcp_stream=False
-) -> list:
+def build_probtrackx2_arguments(arg: dict, sub: str, hcp_stream=False) -> list:
     """
     Function to build out probtrackx2 arguments
 
@@ -100,14 +98,16 @@ def build_probtrackx2_arguments(
     warps = command_arguments["warps"]
     seeds = command_arguments["seed"]
     mask = os.path.join(command_arguments["bpx_path"], "nodif_brain_mask")
-    target_mask = os.path.join(sub, 'nfact_pp', 'target2.nii.gz')
-    bpx = os.path.join(command_arguments["bpx_path"], 'merged')
-    output_dir = os.path.join(sub, 'nfact_pp', 'omatrxi2')
+    target_mask = os.path.join(sub, "nfact_pp", "target2.nii.gz")
+    bpx = os.path.join(command_arguments["bpx_path"], "merged")
+    output_dir = os.path.join(sub, "nfact_pp", "omatrxi2")
 
     return [
         binary,
-        "-x", seeds,
-        "-s", bpx,
+        "-x",
+        seeds,
+        "-s",
+        bpx,
         f"--mask={mask}",
         f"--xfm={warps[0]}",
         f"--invxfm={warps[1]}",
@@ -159,7 +159,7 @@ def run_probtrackx(nfactpp_diretory: str, command: list) -> None:
     -------
     None
     """
-    
+
     print("Running", command[0])
     try:
         log_name = "PP_log_" + date_for_filename()
@@ -206,7 +206,7 @@ def get_target2(
     -------
     None
     """
-    print('Creating target2 image')
+    print("Creating target2 image")
     try:
         run = subprocess.run(
             [
@@ -273,6 +273,6 @@ def seeds_to_ascii(surfin: str, roi: str, surfout: str) -> None:
 
     if run.returncode != 0:
         error_and_exit(
-            False, 
-            f"FSL surf2surf failure due to {run.stderr}. Unable to create asc surface"
+            False,
+            f"FSL surf2surf failure due to {run.stderr}. Unable to create asc surface",
         )

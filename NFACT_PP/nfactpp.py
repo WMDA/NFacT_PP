@@ -89,7 +89,7 @@ def hcp_stream_main(arg: dict) -> None:
         nfactpp_diretory = os.path.join(sub, "nfact_pp")
         directory_created = make_directory(nfactpp_diretory)
         error_and_exit(directory_created)
-        seeds = hcp_get_seeds(sub) 
+        seeds = hcp_get_seeds(sub)
         arg["rois"] = hcp_get_rois(sub)
         arg["mask"] = hcp_get_target_image(sub)
 
@@ -102,9 +102,11 @@ def hcp_stream_main(arg: dict) -> None:
                     nfactpp_diretory, f"{hemishphere}_white.32k_fs_LR.surf.asc"
                 ),
             )
-        
-        asc_seeds = [os.path.join(nfactpp_diretory, 'left_white.32k_fs_LR.surf.asc'), 
-                     os.path.join(nfactpp_diretory, 'right_white.32k_fs_LR.surf.asc')]
+
+        asc_seeds = [
+            os.path.join(nfactpp_diretory, "left_white.32k_fs_LR.surf.asc"),
+            os.path.join(nfactpp_diretory, "right_white.32k_fs_LR.surf.asc"),
+        ]
         seed_text = "\n".join(asc_seeds)
         files_written = write_options_to_file(nfactpp_diretory, seed_text)
         error_and_exit(files_written)
@@ -116,9 +118,7 @@ def hcp_stream_main(arg: dict) -> None:
             arg["mask"],
             "nearestneighbour",
         )
-        command = build_probtrackx2_arguments(
-            arg, sub, hcp_stream=True
-        )
+        command = build_probtrackx2_arguments(arg, sub, hcp_stream=True)
 
         run_probtrackx(nfactpp_diretory, command)
         seed_text = "\n".join(seeds)
