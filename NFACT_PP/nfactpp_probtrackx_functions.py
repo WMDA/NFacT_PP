@@ -2,7 +2,6 @@ import os
 import subprocess
 
 from NFACT_PP.nfactpp_utils_functions import (
-    add_file_path_for_images,
     write_to_file,
     date_for_filename,
     error_and_exit,
@@ -62,9 +61,8 @@ def process_command_arguments(arg: dict, sub: str):
         dict of processed
         command line arguments
     """
-    images = add_file_path_for_images(arg, sub)
     return {
-        "warps": images["warps"],
+        "warps": [os.path.join(sub, warp) for warp in arg['warps']],
         "seed": os.path.join(sub, "nfact_pp", "seeds.txt"),
         "bpx_path": os.path.join(sub, arg["bpx_path"]),
     }
@@ -90,6 +88,7 @@ def build_probtrackx2_arguments(arg: dict, sub: str, hcp_stream=False) -> list:
         list of probtrackx2 arguements
     """
     if hcp_stream:
+        print('HCP arguments')
         command_arguments = hcp_files(sub)
     if not hcp_stream:
         command_arguments = process_command_arguments(arg, sub)

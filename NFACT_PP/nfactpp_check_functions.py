@@ -185,87 +185,30 @@ def list_of_subjects_from_directory(study_folder: str) -> list:
     return [direct for direct in list_of_subject if os.path.isdir(direct)]
 
 
-def check_compulsory_files_exist(
-    sub_path: str, seeds: list, roi: list, bedpost: str, warps: list, mask: str
-) -> dict:
+def get_file(img_file: list, 
+             sub: str) -> list:
     """
-    Function to check if complusory files
-    exist.
+    Function to get an imaging file
+    type and returns it. Checks that file
+    is correct file type and exists.
 
     Parameters
     ----------
-    sub_path: str
-        path to subjects directory
-    seeds: list
-        name of seed(s) in list format
-    roi: list
-        name of ROIs in list form
-    bedpost: str
-        bedpostx suffix
-    warps: list
-        name of warp files given
+    img_file: list
+        a list of imaging files
+    sub: str
+       path to subjects directory. 
 
     Returns
     -------
-    dict: dictionary
-        dict of if files exist bool
+    img_files: list
+        list of imging files
+
     """
-    return {
-        "seed": [os.path.exists(os.path.join(sub_path, seed)) for seed in seeds],
-        "roi": [
-            os.path.exists(os.path.join(sub_path, region_of_interest))
-            for region_of_interest in roi
-        ],
-        "bedpost": [os.path.exists(os.path.join(sub_path, bedpost))],
-        "warps": [os.path.exists(os.path.join(sub_path, warp)) for warp in warps],
-        "mask": [os.path.exists(os.path.join(sub_path, mask))],
-    }
-
-
-def check_subject_files(arg: dict) -> bool:
-    """
-    Function to check that all
-    manditory files are present
-
-    Parameters
-    ----------
-    arg: dict
-        arguments from command line
-
-    Returns
-    -------
-    bool: boolean
-        True if all files exist
-        else False and error messages
-    """
-    for subject in arg["list_of_subjects"]:
-        do_files_exist = check_compulsory_files_exist(
-            subject,
-            arg["seed"],
-            arg["rois"],
-            arg["bpx_suffix"],
-            arg["warps"],
-            arg["target_mask"],
-        )
-        everything_there = True
-        for key, value in do_files_exist.items():
-            if any(element is False for element in value):
-                sub = os.path.basename(subject)
-                col = colours()
-                print(
-                    f'{col["red"]}missing {key} for subject: {sub} in {subject}{col["reset"]}'
-                )
-                everything_there = False
-            if everything_there:
-                # Added this here to stop repatedly looping over subjects
-                imaging_files = image_check(
-                    subject, arg["seed"], arg["rois"], arg["warps"]
-                )
-                for key, value in imaging_files.items():
-                    if any(element is False for element in value):
-                        everything_there = False
-
-    return everything_there
+    img_files = [os.path.join(sub, file) for file in img_file]
+    [error_and_exit(os.path.exists(path), f'Unable to find {path}. Please check it exists') for path in img_files]
+    [check_files_are_imaging_files(path) for path in img_files]
+    return img_files
 
 
 def check_files_are_imaging_files(path: str) -> bool:
@@ -278,59 +221,14 @@ def check_files_are_imaging_files(path: str) -> bool:
 
     Returns
     -------
-    bool: boolean
-       True if files are else returns
-       False with error messages
+    None
     """
     accepted_extenions = [".gii", ".nii"]
     file_extensions = pathlib.Path(path).suffixes
-    if [file for file in file_extensions if file in accepted_extenions]:
-        return True
-    col = colours()
     file = os.path.basename(path)
     sub = os.path.basename(os.path.dirname(path))
-    print(
-        f'{col["red"]}{file} for {sub} is an incorrect file type (not gii or nii).{col["reset"]}'
-    )
-    return False
-
-
-def image_check(sub_path: str, seeds: list, roi: list, warps: list):
-    """
-    Function to check that images files given
-    are actually imaging files.
-
-    Parameters
-    ----------
-    sub_path: str
-        path to subjects directory
-    seeds: list
-        name of seed(s) in list format
-    roi: list
-        name of ROIs in list form
-    warps: list
-        name of warp files given
-
-    Returns
-    -------
-    dict: dictionary
-        dict of if files are imaging files bool
-    """
-    return {
-        "seed": [
-            check_files_are_imaging_files(os.path.join(sub_path, seed))
-            for seed in seeds
-        ],
-        "roi": [
-            check_files_are_imaging_files(os.path.join(sub_path, region_of_interest))
-            for region_of_interest in roi
-        ],
-        "warps": [
-            check_files_are_imaging_files(os.path.join(sub_path, warp))
-            for warp in warps
-        ],
-    }
-
+    error_and_exit([file for file in file_extensions if file in accepted_extenions],
+                   f"{file} for {sub} is an incorrect file type (not gii or nii)")
 
 def check_fsl_is_installed():
     """
@@ -398,3 +296,6 @@ def check_surface_arguments(seed: list, roi: list) -> None:
     surface = [file for file in extension if file == "gii"]
     if surface:
         error_and_exit(roi, "Surfaces given as seeds but no ROI. Please provide ROI")
+        error_and_exit(len(seed) == len(roi), "Number of seeds and number of ROIS must match")
+        return True
+    return False
