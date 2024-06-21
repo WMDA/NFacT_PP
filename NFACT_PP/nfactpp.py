@@ -41,29 +41,31 @@ def main_nfact_preprocess(arg: dict) -> None:
     for sub in arg["list_of_subjects"]:
         # looping over subjects and building out directories
         print("\nworking on: ", os.path.basename(sub))
-        seed = nff.get_file(arg['seed'], sub)
+        seed = nff.get_file(arg["seed"], sub)
         seed_text = "\n".join(seed)
-        nff.get_file(arg['warps'], sub)
-        mask = nff.get_file([arg['mask']], sub)[0]
+        nff.get_file(arg["warps"], sub)
+        mask = nff.get_file([arg["mask"]], sub)[0]
         nfactpp_diretory = os.path.join(sub, "nfact_pp")
         print(nfactpp_diretory)
         directory_created = make_directory(nfactpp_diretory)
         error_and_exit(directory_created)
-        
+
         if surface_processing:
-            roi = nff.get_file(arg['rois'], sub)
-            seed_names = [re.sub(r'..ii', '' ,os.path.basename(seeds)) for seeds in seed]
+            roi = nff.get_file(arg["rois"], sub)
+            seed_names = [
+                re.sub(r"..ii", "", os.path.basename(seeds)) for seeds in seed
+            ]
             for img in range(0, len(roi)):
-                seeds_to_ascii(seed[img], roi[img], os.path.join(
-                    nfactpp_diretory, f"{seed_names[img]}.asc"
-                ))
+                seeds_to_ascii(
+                    seed[img],
+                    roi[img],
+                    os.path.join(nfactpp_diretory, f"{seed_names[img]}.asc"),
+                )
             asc_seeds = [
-            os.path.join(nfactpp_diretory, f"{seed}.asc")
-            for seed in seed_names
-        ]
+                os.path.join(nfactpp_diretory, f"{seed}.asc") for seed in seed_names
+            ]
             seed_text = "\n".join(asc_seeds)
 
-        
         error_and_exit(write_options_to_file(nfactpp_diretory, seed_text))
 
         get_target2(
@@ -72,11 +74,11 @@ def main_nfact_preprocess(arg: dict) -> None:
             arg["res"],
             mask,
             "nearestneighbour",
-        )        
+        )
         command = build_probtrackx2_arguments(arg, sub)
         # Running probtrackx2
         run_probtrackx(nfactpp_diretory, command)
-            
+
     print("Finished")
     exit(0)
 

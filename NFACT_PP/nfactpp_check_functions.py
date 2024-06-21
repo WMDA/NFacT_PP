@@ -185,8 +185,7 @@ def list_of_subjects_from_directory(study_folder: str) -> list:
     return [direct for direct in list_of_subject if os.path.isdir(direct)]
 
 
-def get_file(img_file: list, 
-             sub: str) -> list:
+def get_file(img_file: list, sub: str) -> list:
     """
     Function to get an imaging file
     type and returns it. Checks that file
@@ -197,7 +196,7 @@ def get_file(img_file: list,
     img_file: list
         a list of imaging files
     sub: str
-       path to subjects directory. 
+       path to subjects directory.
 
     Returns
     -------
@@ -206,7 +205,12 @@ def get_file(img_file: list,
 
     """
     img_files = [os.path.join(sub, file) for file in img_file]
-    [error_and_exit(os.path.exists(path), f'Unable to find {path}. Please check it exists') for path in img_files]
+    [
+        error_and_exit(
+            os.path.exists(path), f"Unable to find {path}. Please check it exists"
+        )
+        for path in img_files
+    ]
     [check_files_are_imaging_files(path) for path in img_files]
     return img_files
 
@@ -227,8 +231,11 @@ def check_files_are_imaging_files(path: str) -> bool:
     file_extensions = pathlib.Path(path).suffixes
     file = os.path.basename(path)
     sub = os.path.basename(os.path.dirname(path))
-    error_and_exit([file for file in file_extensions if file in accepted_extenions],
-                   f"{file} for {sub} is an incorrect file type (not gii or nii)")
+    error_and_exit(
+        [file for file in file_extensions if file in accepted_extenions],
+        f"{file} for {sub} is an incorrect file type (not gii or nii)",
+    )
+
 
 def check_fsl_is_installed():
     """
@@ -296,6 +303,8 @@ def check_surface_arguments(seed: list, roi: list) -> None:
     surface = [file for file in extension if file == "gii"]
     if surface:
         error_and_exit(roi, "Surfaces given as seeds but no ROI. Please provide ROI")
-        error_and_exit(len(seed) == len(roi), "Number of seeds and number of ROIS must match")
+        error_and_exit(
+            len(seed) == len(roi), "Number of seeds and number of ROIS must match"
+        )
         return True
     return False

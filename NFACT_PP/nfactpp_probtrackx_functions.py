@@ -62,7 +62,7 @@ def process_command_arguments(arg: dict, sub: str):
         command line arguments
     """
     return {
-        "warps": [os.path.join(sub, warp) for warp in arg['warps']],
+        "warps": [os.path.join(sub, warp) for warp in arg["warps"]],
         "seed": os.path.join(sub, "nfact_pp", "seeds.txt"),
         "bpx_path": os.path.join(sub, arg["bpx_path"]),
     }
@@ -88,7 +88,7 @@ def build_probtrackx2_arguments(arg: dict, sub: str, hcp_stream=False) -> list:
         list of probtrackx2 arguements
     """
     if hcp_stream:
-        print('HCP arguments')
+        print("HCP arguments")
         command_arguments = hcp_files(sub)
     if not hcp_stream:
         command_arguments = process_command_arguments(arg, sub)
