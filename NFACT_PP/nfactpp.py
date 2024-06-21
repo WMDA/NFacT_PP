@@ -56,9 +56,10 @@ def main_nfact_preprocess(arg: dict) -> None:
         error_and_exit(files_written)
 
         command = build_probtrackx2_arguments(arg, sub, nfactpp_diretory)
+        print(command)
 
         # Running probtrackx2
-        run_probtrackx(nfactpp_diretory, command)
+        #run_probtrackx(nfactpp_diretory, command)
 
     print("Finished")
     exit(0)
