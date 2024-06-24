@@ -109,6 +109,7 @@ def args() -> dict:
         help="Resolution of NMF volume components (Default = 2 mm)",
     )
     option.add_argument(
+        "-P",
         "--ptx_options",
         dest="ptx_options",
         help="Path to ptx_options file for additional options",

@@ -57,10 +57,10 @@ if __name__ == "__main__":
     if arg["ptx_options"]:
         try:
             arg["ptx_options"] = read_file_to_list(arg["ptx_options"])
+            arg["ptx_options"] = [arg.strip() for arg in arg["ptx_options"]]
         except Exception as e:
             error_and_exit(False, f"Unable to read ptx_options text file due to {e}")
 
-    breakpoint()
     if arg["hcp_stream"]:
         hcp_stream_main(arg)
 
