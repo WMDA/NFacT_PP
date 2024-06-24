@@ -280,3 +280,28 @@ def seeds_to_ascii(surfin: str, roi: str, surfout: str) -> None:
             False,
             f"FSL surf2surf failure due to {run.stderr}. Unable to create asc surface",
         )
+
+
+def get_probtrack2_arguments():
+    """
+    Function to get probtrack2
+    arguments to check that user input
+    is valid
+
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    help_arguments: str
+        string of help arguments
+    """
+    import subprocess
+
+    try:
+        help_arguments = subprocess.run(["probtrackx2", "--help"], capture_output=True)
+    except subprocess.CalledProcessError as error:
+        error_and_exit(False, f"Error in calling surf2surf: {error}")
+
+    return help_arguments.stderr.decode("utf-8")
