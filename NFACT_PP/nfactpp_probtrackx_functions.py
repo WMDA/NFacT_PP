@@ -118,7 +118,7 @@ def build_probtrackx2_arguments(
         "--loopcheck",
         "--forcedir",
         "--opd",
-        "--nsamples=1000",
+        f"--nsamples={arg['nsamples']}",
         f"--dir={output_dir}",
         "--pd",
     ]
