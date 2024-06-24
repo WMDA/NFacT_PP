@@ -1,7 +1,9 @@
 import os
 import glob
 import pathlib
+import re
 from NFACT_PP.nfactpp_utils_functions import colours, read_file_to_list, error_and_exit
+from NFACT_PP.nfactpp_probtrackx_functions import get_probtrack2_arguments
 
 
 def directory_contains_subjects(study_folder_path: str) -> bool:
@@ -308,3 +310,30 @@ def check_surface_arguments(seed: list, roi: list) -> None:
         )
         return True
     return False
+
+
+def check_ptx_options_are_valid(ptx_options: list):
+    """
+    Function to check that ptx options
+    valid options. Errors out if
+    any are not valid options
+
+    Parameters
+    ----------
+    ptx_options: list
+       list of user defined options
+
+    Returns
+    -------
+    None
+    """
+
+    check_out = get_probtrack2_arguments()
+    probtrack_args = re.findall(r"-.*?\t", check_out)
+    stripped_args = [arg.rstrip("\t") for arg in probtrack_args]
+    probtrack_args = sum([arg.split(",") for arg in stripped_args], [])
+    [
+        error_and_exit(False, f"{arg} is not a probtrackx2 option")
+        for arg in ptx_options
+        if arg not in probtrack_args
+    ]
