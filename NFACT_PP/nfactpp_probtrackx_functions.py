@@ -147,15 +147,12 @@ def write_options_to_file(file_path: str, seed_txt: str):
     return True
 
 
-def run_probtrackx(nfactpp_diretory: str, command: list) -> None:
+def run_probtrackx(command: list) -> None:
     """
     Function to run probtrackx
 
     Parameters
     ----------
-    nfactpp_diretory: str
-        path to nfactpp_diretory
-
     command: list
         command in list form to run
 
@@ -163,8 +160,12 @@ def run_probtrackx(nfactpp_diretory: str, command: list) -> None:
     -------
     None
     """
-
-    print("Running", command[0])
+    nfactpp_diretory = os.path.dirname(command[2])
+    print(
+        f"Running",
+        command[0],
+        f" on subject {os.path.basename(os.path.dirname(os.path.dirname(command[2])))}",
+    )
     try:
         log_name = "PP_log_" + date_for_filename()
         with open(os.path.join(nfactpp_diretory, log_name), "w") as log_file:
@@ -177,6 +178,33 @@ def run_probtrackx(nfactpp_diretory: str, command: list) -> None:
     # Error handling subprocess
     if run.returncode != 0:
         error_and_exit(False, f"Error in {command[0]} please check log files")
+
+
+def probtrackx(command: list, cluster: bool = False, parallel: bool = False) -> None:
+    """
+    Function to determine how probtrackx
+    should be run. Either parallel processed,
+    on the cluster or linearly.
+
+    Parameters
+    ----------
+    command: list
+        command in list form to run
+    cluster: bool
+       to run on a cluster. Default
+       is False
+    parallel: bool
+       to parallel process
+
+    Returns
+    -------
+
+    """
+    if cluster:
+        return None
+    if parallel:
+        return None
+    run_probtrackx(command)
 
 
 def get_target2(
@@ -282,7 +310,7 @@ def seeds_to_ascii(surfin: str, roi: str, surfout: str) -> None:
         )
 
 
-def get_probtrack2_arguments():
+def get_probtrack2_arguments() -> None:
     """
     Function to get probtrack2
     arguments to check that user input

@@ -14,7 +14,7 @@ from NFACT_PP.nfactpp_utils_functions import (
 from NFACT_PP.nfactpp_probtrackx_functions import (
     build_probtrackx2_arguments,
     write_options_to_file,
-    run_probtrackx,
+    probtrackx,
     get_target2,
     seeds_to_ascii,
 )
@@ -38,15 +38,21 @@ def main_nfact_preprocess(arg: dict) -> None:
     surface_processing = nff.check_surface_arguments(arg["seed"], arg["rois"])
 
     print("Number of subjects: ", len(arg["list_of_subjects"]))
+    subject_commands = dict(
+        zip(
+            [sub for sub in arg["list_of_subjects"]],
+            [[] for sub in arg["list_of_subjects"]],
+        )
+    )
+
     for sub in arg["list_of_subjects"]:
         # looping over subjects and building out directories
-        print("\nworking on: ", os.path.basename(sub))
+        print(f"\nSetting up {os.path.basename(sub)}")
         seed = nff.get_file(arg["seed"], sub)
         seed_text = "\n".join(seed)
         nff.get_file(arg["warps"], sub)
         mask = nff.get_file([arg["mask"]], sub)[0]
         nfactpp_diretory = os.path.join(sub, "nfact_pp")
-        print(nfactpp_diretory)
         directory_created = make_directory(nfactpp_diretory)
         error_and_exit(directory_created)
 
@@ -81,9 +87,10 @@ def main_nfact_preprocess(arg: dict) -> None:
             hcp_stream=False,
             ptx_options=arg["ptx_options"],
         )
+        subject_commands[sub] = command
 
-        # Running probtrackx2
-        run_probtrackx(nfactpp_diretory, command)
+    # Running probtrackx2
+    probtrackx(command, arg["cluster"], arg["n_cores"])
 
     print("Finished")
     exit(0)
