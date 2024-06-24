@@ -75,16 +75,10 @@ def args() -> dict:
         help="The suffix of the path leading to the transforms between standard space and diffusion space",
     )
     option.add_argument(
-        "-p",
-        "--prefix",
-        dest="prefix",
-        help="Designate a prefix to the group-level output directory name (default directory name: <study>/nfact_group)",
-    )
-    option.add_argument(
         "-o",
         "--out",
         dest="out",
-        help="Path to output folder (default is to create subject-level output under the input subject directory and group-level under the study folder)",
+        help="Path to output folder",
     )
     option.add_argument(
         "-H",
@@ -113,6 +107,13 @@ def args() -> dict:
         dest="res",
         default=2,
         help="Resolution of NMF volume components (Default = 2 mm)",
+    )
+    option.add_argument(
+        "-P",
+        "--ptx_options",
+        dest="ptx_options",
+        help="Path to ptx_options file for additional options",
+        default=False,
     )
     return vars(option.parse_args())
 

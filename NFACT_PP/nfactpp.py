@@ -75,7 +75,13 @@ def main_nfact_preprocess(arg: dict) -> None:
             mask,
             "nearestneighbour",
         )
-        command = build_probtrackx2_arguments(arg, sub)
+        command = build_probtrackx2_arguments(
+            arg,
+            sub,
+            hcp_stream=False,
+            ptx_options=arg["ptx_options"],
+        )
+
         # Running probtrackx2
         run_probtrackx(nfactpp_diretory, command)
 

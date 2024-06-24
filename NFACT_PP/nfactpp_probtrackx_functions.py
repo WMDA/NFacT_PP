@@ -68,7 +68,9 @@ def process_command_arguments(arg: dict, sub: str):
     }
 
 
-def build_probtrackx2_arguments(arg: dict, sub: str, hcp_stream=False) -> list:
+def build_probtrackx2_arguments(
+    arg: dict, sub: str, hcp_stream=False, ptx_options=False
+) -> list:
     """
     Function to build out probtrackx2 arguments
 
@@ -101,7 +103,7 @@ def build_probtrackx2_arguments(arg: dict, sub: str, hcp_stream=False) -> list:
     bpx = os.path.join(command_arguments["bpx_path"], "merged")
     output_dir = os.path.join(sub, "nfact_pp", "omatrxi2")
 
-    return [
+    command = [
         binary,
         "-x",
         seeds,
@@ -116,10 +118,13 @@ def build_probtrackx2_arguments(arg: dict, sub: str, hcp_stream=False) -> list:
         "--loopcheck",
         "--forcedir",
         "--opd",
-        "--nsamples=1000",
+        f"--nsamples={arg['nsamples']}",
         f"--dir={output_dir}",
         "--pd",
     ]
+    if ptx_options:
+        command = command + ptx_options
+    return command
 
 
 def write_options_to_file(file_path: str, seed_txt: str):
