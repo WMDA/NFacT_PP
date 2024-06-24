@@ -151,7 +151,7 @@ def hcp_stream_main(arg: dict) -> None:
         )
         command = build_probtrackx2_arguments(arg, sub, hcp_stream=True)
 
-        run_probtrackx(nfactpp_diretory, command)
+        probtrackx(nfactpp_diretory, command)
         seed_text = "\n".join(seeds)
         error_and_exit(write_options_to_file(nfactpp_diretory, seed_text))
         exit(0)

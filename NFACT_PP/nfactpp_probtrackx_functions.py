@@ -174,6 +174,8 @@ def run_probtrackx(command: list) -> None:
         error_and_exit(False, f"Error in calling probtrackx blueprint: {error}")
     except KeyboardInterrupt:
         run.kill()
+    except Exception as e:
+        error_and_exit(False, f'The following error occured: {e}')
         return None
     # Error handling subprocess
     if run.returncode != 0:
