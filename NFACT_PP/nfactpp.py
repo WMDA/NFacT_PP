@@ -14,13 +14,13 @@ from NFACT_PP.nfactpp_utils_functions import (
 from NFACT_PP.nfactpp_probtrackx_functions import (
     build_probtrackx2_arguments,
     write_options_to_file,
-    probtrackx,
+    Probtrackx,
     get_target2,
     seeds_to_ascii,
 )
 
 
-def main_nfact_preprocess(arg: dict) -> None:
+def main_nfact_preprocess(arg: dict, handler) -> None:
     """
     Main function for nfact PP
 
@@ -38,12 +38,7 @@ def main_nfact_preprocess(arg: dict) -> None:
     surface_processing = nff.check_surface_arguments(arg["seed"], arg["rois"])
 
     print("Number of subjects: ", len(arg["list_of_subjects"]))
-    subject_commands = dict(
-        zip(
-            [sub for sub in arg["list_of_subjects"]],
-            [[] for sub in arg["list_of_subjects"]],
-        )
-    )
+    subjects_commands = []
 
     for sub in arg["list_of_subjects"]:
         # looping over subjects and building out directories
@@ -87,16 +82,19 @@ def main_nfact_preprocess(arg: dict) -> None:
             hcp_stream=False,
             ptx_options=arg["ptx_options"],
         )
-        subject_commands[sub] = command
+        subjects_commands.append(command)
+
+    if arg["n_cores"]:
+        handler.set_suppress_messages = True
 
     # Running probtrackx2
-    probtrackx(command, arg["cluster"], arg["n_cores"])
+    Probtrackx(subjects_commands, arg["cluster"], arg["n_cores"])
 
     print("Finished")
     exit(0)
 
 
-def hcp_stream_main(arg: dict) -> None:
+def hcp_stream_main(arg: dict, handler: object) -> None:
     """
     hcp stream main function
 
@@ -151,9 +149,11 @@ def hcp_stream_main(arg: dict) -> None:
         )
         command = build_probtrackx2_arguments(arg, sub, hcp_stream=True)
 
-        probtrackx(nfactpp_diretory, command)
-        seed_text = "\n".join(seeds)
-        error_and_exit(write_options_to_file(nfactpp_diretory, seed_text))
-        exit(0)
+    if arg["n_cores"]:
+        handler.set_suppress_messages = True
+
+    Probtrackx(nfactpp_diretory, command)
+    seed_text = "\n".join(seeds)
+    error_and_exit(write_options_to_file(nfactpp_diretory, seed_text))
     print("\nFinished HCP stream")
     exit(0)
