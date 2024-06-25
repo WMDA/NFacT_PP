@@ -10,6 +10,7 @@ from NFACT_PP.nfactpp_utils_functions import (
     hcp_get_target_image,
     hcp_get_rois,
     hcp_reorder_seeds_rois,
+    colours,
 )
 from NFACT_PP.nfactpp_probtrackx_functions import (
     build_probtrackx2_arguments,
@@ -36,6 +37,11 @@ def main_nfact_preprocess(arg: dict, handler) -> None:
     """
 
     surface_processing = nff.check_surface_arguments(arg["seed"], arg["rois"])
+    col = colours()
+    if surface_processing:
+        print(f'{col["purple"]}Surface seeds mode{col["reset"]}')
+    else:
+        print(f'{col["purple"]}Volume seed mode{col["reset"]}')
 
     print("Number of subjects: ", len(arg["list_of_subjects"]))
     subjects_commands = []
@@ -76,13 +82,14 @@ def main_nfact_preprocess(arg: dict, handler) -> None:
             mask,
             "nearestneighbour",
         )
-        command = build_probtrackx2_arguments(
-            arg,
-            sub,
-            hcp_stream=False,
-            ptx_options=arg["ptx_options"],
+        subjects_commands.append(
+            build_probtrackx2_arguments(
+                arg,
+                sub,
+                hcp_stream=False,
+                ptx_options=arg["ptx_options"],
+            )
         )
-        subjects_commands.append(command)
 
     if arg["n_cores"]:
         handler.set_suppress_messages = True
@@ -109,9 +116,9 @@ def hcp_stream_main(arg: dict, handler: object) -> None:
     None
 
     """
-
-    print("HCP stream selected")
-
+    col = colours()
+    print(f'{col["purple"]}HCP stream selected{col["reset"]}')
+    subjects_commands = []
     print("Number of subjects: ", len(arg["list_of_subjects"]))
     for sub in arg["list_of_subjects"]:
         # looping over subjects and building out directories
@@ -147,12 +154,12 @@ def hcp_stream_main(arg: dict, handler: object) -> None:
             arg["mask"],
             "nearestneighbour",
         )
-        command = build_probtrackx2_arguments(arg, sub, hcp_stream=True)
+        subjects_commands.append(build_probtrackx2_arguments(arg, sub, hcp_stream=True))
 
     if arg["n_cores"]:
         handler.set_suppress_messages = True
 
-    Probtrackx(nfactpp_diretory, command)
+    Probtrackx(subjects_commands, arg["cluster"], arg["n_cores"])
     seed_text = "\n".join(seeds)
     error_and_exit(write_options_to_file(nfactpp_diretory, seed_text))
     print("\nFinished HCP stream")

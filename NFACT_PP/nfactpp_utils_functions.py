@@ -40,7 +40,7 @@ def colours():
     dict: dictionary object
         dictionary of color strings
     """
-    return {"reset": "\033[0;0m", "red": "\033[1;31m"}
+    return {"reset": "\033[0;0m", "red": "\033[1;31m", "purple": "\033[1;35m"}
 
 
 def make_directory(path: str) -> None:

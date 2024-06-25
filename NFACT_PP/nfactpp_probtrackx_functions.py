@@ -166,6 +166,9 @@ class Probtrackx:
 
         if self.parallel:
             self.parallel_mode()
+        if self.cluster:
+            print("Cluster implementation currently not avaiable")
+            return None
         if not self.parallel and not self.cluster:
             self.single_subject_run()
 
