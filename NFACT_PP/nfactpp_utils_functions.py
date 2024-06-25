@@ -40,7 +40,7 @@ def colours():
     dict: dictionary object
         dictionary of color strings
     """
-    return {"reset": "\033[0;0m", "red": "\033[1;31m"}
+    return {"reset": "\033[0;0m", "red": "\033[1;31m", "purple": "\033[1;35m"}
 
 
 def make_directory(path: str) -> None:
@@ -106,8 +106,11 @@ class Signit_handler:
     programme safely.
     """
 
-    def __init__(self) -> None:
+    def __init__(
+        self,
+    ) -> None:
         self.register_handler()
+        self.suppress_messages = False
 
     def register_handler(self) -> None:
         """
@@ -124,9 +127,20 @@ class Signit_handler:
         sig: The signal number
         frame: The current stack frame
         """
-        print("\nUser killed script (Ctrl+C). Terminating...")
-        print("Exiting...")
+        if not self.suppress_messages:
+            print("\nRecieved kill signal (Ctrl+C). Terminating...")
+            print("Exiting...")
         exit(0)
+
+    @property
+    def get_suppress_messages(self):
+        """Getter for suppress_messages"""
+        return self.suppress_messages
+
+    @get_suppress_messages.setter
+    def set_suppress_messages(self, value: bool) -> None:
+        """Setter for suppress_messages"""
+        self.suppress_messages = value
 
 
 def date_for_filename() -> str:

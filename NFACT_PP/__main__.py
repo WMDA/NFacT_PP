@@ -65,6 +65,6 @@ if __name__ == "__main__":
         check_ptx_options_are_valid(arg["ptx_options"])
 
     if arg["hcp_stream"]:
-        hcp_stream_main(arg)
+        hcp_stream_main(arg, handler)
 
-    main_nfact_preprocess(arg)
+    main_nfact_preprocess(arg, handler)

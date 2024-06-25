@@ -10,17 +10,18 @@ from NFACT_PP.nfactpp_utils_functions import (
     hcp_get_target_image,
     hcp_get_rois,
     hcp_reorder_seeds_rois,
+    colours,
 )
 from NFACT_PP.nfactpp_probtrackx_functions import (
     build_probtrackx2_arguments,
     write_options_to_file,
-    run_probtrackx,
+    Probtrackx,
     get_target2,
     seeds_to_ascii,
 )
 
 
-def main_nfact_preprocess(arg: dict) -> None:
+def main_nfact_preprocess(arg: dict, handler) -> None:
     """
     Main function for nfact PP
 
@@ -36,17 +37,23 @@ def main_nfact_preprocess(arg: dict) -> None:
     """
 
     surface_processing = nff.check_surface_arguments(arg["seed"], arg["rois"])
+    col = colours()
+    if surface_processing:
+        print(f'{col["purple"]}Surface seeds mode{col["reset"]}')
+    else:
+        print(f'{col["purple"]}Volume seed mode{col["reset"]}')
 
     print("Number of subjects: ", len(arg["list_of_subjects"]))
+    subjects_commands = []
+
     for sub in arg["list_of_subjects"]:
         # looping over subjects and building out directories
-        print("\nworking on: ", os.path.basename(sub))
+        print(f"\nSetting up {os.path.basename(sub)}")
         seed = nff.get_file(arg["seed"], sub)
         seed_text = "\n".join(seed)
         nff.get_file(arg["warps"], sub)
         mask = nff.get_file([arg["mask"]], sub)[0]
         nfactpp_diretory = os.path.join(sub, "nfact_pp")
-        print(nfactpp_diretory)
         directory_created = make_directory(nfactpp_diretory)
         error_and_exit(directory_created)
 
@@ -75,21 +82,26 @@ def main_nfact_preprocess(arg: dict) -> None:
             mask,
             "nearestneighbour",
         )
-        command = build_probtrackx2_arguments(
-            arg,
-            sub,
-            hcp_stream=False,
-            ptx_options=arg["ptx_options"],
+        subjects_commands.append(
+            build_probtrackx2_arguments(
+                arg,
+                sub,
+                hcp_stream=False,
+                ptx_options=arg["ptx_options"],
+            )
         )
 
-        # Running probtrackx2
-        run_probtrackx(nfactpp_diretory, command)
+    if arg["n_cores"]:
+        handler.set_suppress_messages = True
+
+    # Running probtrackx2
+    Probtrackx(subjects_commands, arg["cluster"], arg["n_cores"])
 
     print("Finished")
     exit(0)
 
 
-def hcp_stream_main(arg: dict) -> None:
+def hcp_stream_main(arg: dict, handler: object) -> None:
     """
     hcp stream main function
 
@@ -104,9 +116,9 @@ def hcp_stream_main(arg: dict) -> None:
     None
 
     """
-
-    print("HCP stream selected")
-
+    col = colours()
+    print(f'{col["purple"]}HCP stream selected{col["reset"]}')
+    subjects_commands = []
     print("Number of subjects: ", len(arg["list_of_subjects"]))
     for sub in arg["list_of_subjects"]:
         # looping over subjects and building out directories
@@ -142,11 +154,13 @@ def hcp_stream_main(arg: dict) -> None:
             arg["mask"],
             "nearestneighbour",
         )
-        command = build_probtrackx2_arguments(arg, sub, hcp_stream=True)
+        subjects_commands.append(build_probtrackx2_arguments(arg, sub, hcp_stream=True))
 
-        run_probtrackx(nfactpp_diretory, command)
-        seed_text = "\n".join(seeds)
-        error_and_exit(write_options_to_file(nfactpp_diretory, seed_text))
-        exit(0)
+    if arg["n_cores"]:
+        handler.set_suppress_messages = True
+
+    Probtrackx(subjects_commands, arg["cluster"], arg["n_cores"])
+    seed_text = "\n".join(seeds)
+    error_and_exit(write_options_to_file(nfactpp_diretory, seed_text))
     print("\nFinished HCP stream")
     exit(0)

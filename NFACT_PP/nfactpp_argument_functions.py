@@ -115,6 +115,21 @@ def args() -> dict:
         help="Path to ptx_options file for additional options",
         default=False,
     )
+    option.add_argument(
+        "-n",
+        "--n_cores",
+        dest="n_cores",
+        help="If should parallel process and with how many cores",
+        default=False,
+    )
+    option.add_argument(
+        "-C",
+        "--cluster",
+        dest="cluster",
+        action="store_true",
+        default=False,
+        help="Run on cluster",
+    )
     return vars(option.parse_args())
 
 

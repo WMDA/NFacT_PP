@@ -1,6 +1,7 @@
 import os
 import subprocess
-
+import multiprocessing
+import signal
 from NFACT_PP.nfactpp_utils_functions import (
     write_to_file,
     date_for_filename,
@@ -147,36 +148,97 @@ def write_options_to_file(file_path: str, seed_txt: str):
     return True
 
 
-def run_probtrackx(nfactpp_diretory: str, command: list) -> None:
+class Probtrackx:
     """
-    Function to run probtrackx
+    Class to run probtrackx
 
-    Parameters
-    ----------
-    nfactpp_diretory: str
-        path to nfactpp_diretory
-
-    command: list
-        command in list form to run
-
-    Returns
-    -------
-    None
+    Usage
+    -----
+    Probtrackx(command, cluster, parallel)
     """
 
-    print("Running", command[0])
-    try:
-        log_name = "PP_log_" + date_for_filename()
-        with open(os.path.join(nfactpp_diretory, log_name), "w") as log_file:
-            run = subprocess.run(command, stdout=log_file, stderr=log_file)
-    except subprocess.CalledProcessError as error:
-        error_and_exit(False, f"Error in calling probtrackx blueprint: {error}")
-    except KeyboardInterrupt:
-        run.kill()
-        return None
-    # Error handling subprocess
-    if run.returncode != 0:
-        error_and_exit(False, f"Error in {command[0]} please check log files")
+    def __init__(
+        self, command: list, cluster: bool = False, parallel: bool = False
+    ) -> None:
+        self.command = command
+        self.cluster = cluster
+        self.parallel = parallel
+
+        if self.parallel:
+            self.parallel_mode()
+        if self.cluster:
+            print("Cluster implementation currently not avaiable")
+            return None
+        if not self.parallel and not self.cluster:
+            self.single_subject_run()
+
+    def run_probtrackx(self, command: list) -> None:
+        """
+        Function to run probtrackx
+
+        Parameters
+        ----------
+        command: list
+            command in list form to run
+
+        Returns
+        -------
+        None
+        """
+        nfactpp_diretory = os.path.dirname(command[2])
+        print(
+            f"Running",
+            command[0],
+            f" on subject {os.path.basename(os.path.dirname(os.path.dirname(command[2])))}",
+        )
+        try:
+            log_name = "PP_log_" + date_for_filename()
+            with open(os.path.join(nfactpp_diretory, log_name), "w") as log_file:
+                run = subprocess.run(
+                    command, stdout=log_file, stderr=log_file, universal_newlines=True
+                )
+        except subprocess.CalledProcessError as error:
+            error_and_exit(False, f"Error in calling probtrackx2: {error}")
+        except KeyboardInterrupt:
+            run.kill()
+        except Exception as e:
+            error_and_exit(False, f"The following error occured: {e}")
+            return None
+        # Error handling subprocess
+        if run.returncode != 0:
+            error_and_exit(False, f"Error in {command[0]} please check log files")
+
+    def single_subject_run(self) -> None:
+        """
+        Method to do single subject mode
+        Loops over all the subject.
+        """
+        print("Running in single subject mode")
+        for sub_command in self.command:
+            self.run_probtrackx(sub_command)
+
+    def parallel_mode(self) -> None:
+        """
+        Method to parallell process
+        multiple subjects
+        """
+        print(f"\nparrellel processing with {self.parallel} cores")
+        pool = multiprocessing.Pool(processes=int(self.parallel))
+
+        def kill_pool(sig, frame):
+            """
+            Method to kill pool safely.
+            Also prints kill message so that
+            the singit doesn't print it 100x
+            times
+            """
+            pool.terminate()
+            print("\nRecieved kill signal(Ctrl+C). Terminating...")
+            print("Exiting...")
+            exit(0)
+
+        signal.signal(signal.SIGINT, kill_pool)
+        pool.map(self.run_probtrackx, self.command)
 
 
 def get_target2(
@@ -282,7 +344,7 @@ def seeds_to_ascii(surfin: str, roi: str, surfout: str) -> None:
         )
 
 
-def get_probtrack2_arguments():
+def get_probtrack2_arguments() -> None:
     """
     Function to get probtrack2
     arguments to check that user input
@@ -297,7 +359,6 @@ def get_probtrack2_arguments():
     help_arguments: str
         string of help arguments
     """
-    import subprocess
 
     try:
         help_arguments = subprocess.run(["probtrackx2", "--help"], capture_output=True)
