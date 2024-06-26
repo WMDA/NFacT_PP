@@ -28,8 +28,8 @@ def args() -> dict:
         help="Study folder containing sub directories",
     )
     option.add_argument(
-        "-t",
-        "--standard_space",
+        "-i",
+        "--image_standard_space",
         dest="ref",
         required=True,
         help="Standard space reference image",
