@@ -179,7 +179,7 @@ class Probtrackx:
 
     def run_probtrackx(self, command: list) -> None:
         """
-        Function to run probtrackx
+        Method to run probtrackx
 
         Parameters
         ----------
