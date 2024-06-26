@@ -98,9 +98,9 @@ def main_nfact_preprocess(arg: dict, handler) -> None:
 
     if arg["n_cores"]:
         handler.set_suppress_messages = True
-    print(subjects_commands)
+
     # Running probtrackx2
-    # Probtrackx(subjects_commands, arg["cluster"], arg["n_cores"])
+    Probtrackx(subjects_commands, arg["cluster"], arg["n_cores"])
 
     print("Finished")
     exit(0)
@@ -152,13 +152,18 @@ def hcp_stream_main(arg: dict, handler: object) -> None:
         seed_text = "\n".join(asc_seeds)
         error_and_exit(write_options_to_file(nfactpp_diretory, seed_text))
 
-        get_target2(
-            arg["mask"],
-            os.path.join(nfactpp_diretory, "target2"),
-            arg["res"],
-            arg["mask"],
-            "nearestneighbour",
-        )
+        if not arg["target2"]:
+            print(
+                f'{col["purple"]}No target given. Creating a whole brain target.{col["reset"]}'
+            )
+
+            get_target2(
+                arg["mask"],
+                os.path.join(nfactpp_diretory, "target2"),
+                arg["res"],
+                arg["mask"],
+                "nearestneighbour",
+            )
         subjects_commands.append(build_probtrackx2_arguments(arg, sub, hcp_stream=True))
 
     if arg["n_cores"]:

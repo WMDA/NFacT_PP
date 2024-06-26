@@ -17,6 +17,7 @@ def args() -> dict:
         dict of arguments
     """
     option = argparse.ArgumentParser(
+        prog="NFACT_PP",
         description=print(splash()),
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=example_usage(),
