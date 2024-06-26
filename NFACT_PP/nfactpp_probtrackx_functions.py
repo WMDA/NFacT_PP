@@ -100,7 +100,11 @@ def build_probtrackx2_arguments(
     warps = command_arguments["warps"]
     seeds = command_arguments["seed"]
     mask = os.path.join(command_arguments["bpx_path"], "nodif_brain_mask")
-    target_mask = os.path.join(sub, "nfact_pp", "target2.nii.gz")
+    target_mask = (
+        os.path.join(sub.arg["target2"])
+        if arg["target2"]
+        else os.path.join(sub, "nfact_pp", "target2.nii.gz")
+    )
     bpx = os.path.join(command_arguments["bpx_path"], "merged")
     output_dir = os.path.join(sub, "nfact_pp", "omatrxi2")
 

@@ -1,4 +1,5 @@
 import argparse
+from NFACT_PP.nfactpp_utils_functions import colours
 
 
 def args() -> dict:
@@ -20,19 +21,20 @@ def args() -> dict:
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=example_usage(),
     )
+    col = colours()
     option.add_argument(
         "-f",
         "--study_folder",
         dest="study_folder",
         required=True,
-        help="Study folder containing sub directories",
+        help=f"{col['red']}REQUIRED{col['reset']} Study folder containing sub directories of participants.",
     )
     option.add_argument(
         "-i",
         "--image_standard_space",
         dest="ref",
         required=True,
-        help="Standard space reference image",
+        help=f"{col['red']}REQUIRED{col['reset']} Standard space reference image",
     )
     option.add_argument(
         "-l",
@@ -45,7 +47,13 @@ def args() -> dict:
         "-b",
         "--bpx",
         dest="bpx_path",
-        help="Path to Diffusion.bedpostX directory",
+        help="Name of Diffusion.bedpostX directory",
+    )
+    option.add_argument(
+        "-t",
+        "--target",
+        dest="target2",
+        help="Path to target image. If not given will create a whole mask",
     )
     option.add_argument(
         "-s",
@@ -85,7 +93,7 @@ def args() -> dict:
         "--hcp_stream",
         dest="hcp_stream",
         action="store_true",
-        help="Perform averagng across hemispheres. Useful for next steps in decomp if interested in whole brain tractography.",
+        help="HCP stream option. Will search through HCP folder structure for L/R white.32k_fs_LR.surf.gii and ROIs. Then performs suface seed stream",
     )
     option.add_argument(
         "-g",
@@ -145,16 +153,16 @@ def splash() -> str:
     -------
     str: splash
     """
-    return """
-
-##    ## ########    ###     ######  ########         ########  ########
-###   ## ##         ## ##   ##    ##    ##            ##     ## ##     ##
-####  ## ##        ##   ##  ##          ##            ##     ## ##     ##
-## ## ## ######   ##     ## ##          ##            ########  ########
-##  #### ##       ######### ##          ##            ##        ##
-##   ### ##       ##     ## ##    ##    ##            ##        ##
-##    ## ##       ##     ##  ######     ##            ##        ##
-
+    col = colours()
+    return f"""
+{col['pink']} 
+ _   _ ______   ___   _____  _____     ______ ______ 
+| \ | ||  ___| /   \ /  __ \|_   _|    | ___ \| ___ \\
+|  \| || |_   / /_\ \| /  \/  | |      | |_/ /| |_/ /
+|     ||  _|  |  _  || |      | |      |  __/ |  __/ 
+| |\  || |    | | | || \__/\  | |      | |    | |    
+\_| \_/\_|    \_| |_/ \____/  \_/      \_|    \_|  
+{col['reset']} 
 """
 
 
@@ -170,13 +178,37 @@ def example_usage() -> str:
     -------
     str: str object
     """
-    return """
+    col = colours()
+    return f"""
 
 Example Usage:
-    nfact_preprocessing -f /data/study_x -l /home/data/list
-        -b Diffusion.bedpostX -s L.white.surf.gii R.white.surf.gii
-        -r L.medwall.shape.gii R.medwall.shape.gii
-        -w standard2acpc_dc.nii.gz acpc_dc2standard.nii.gz
-        -t <FSLDIR>/data/standard/MNI152_T1_2mm_brain.nii.gz
+    {col['purple']}Seed surface mode:{col['reset']}
+           python3 -m NFACT_PP --study_folder /home/mr_robot/subjects 
+               --list /home/mr_robot/for_axon/nfact_dev/sub_list  
+               --bpx_path Diffusion.bedpostX 
+               --seeds L.white.32k_fs_LR.surf.gii R.white.32k_fs_LR.surf.gii 
+               --rois L.atlasroi.32k_fs_LR.shape.gii  R.atlasroi.32k_fs_LR.shape.gii 
+               --warps standard2acpc_dc.nii.gz acpc_dc2standard.nii.gz 
+               --image_standard_space $FSLDIR/data/standard/MNI152_T1_2mm_brain.nii.gz 
+               --mask wmparc.nii.gz 
+               --gpu --n_cores 3 
+           \n
+    {col['pink']}Volume surface mode:{col['reset']}
+            python3 -m NFACT_PP --study_folder /home/mr_robot/subjects 
+                --list /home/mr_robot/for_axon/nfact_dev/sub_list  
+                --bpx_path Diffusion.bedpostX 
+                --seeds L.white.nii.gz R.white.nii.gz 
+                --warps standard2acpc_dc.nii.gz acpc_dc2standard.nii.gz 
+                --image_standard_space $FSLDIR/data/standard/MNI152_T1_2mm_brain.nii.gz 
+                --mask wmparc.nii.gz 
+                --target dlpfc.nii.gz
+                --gpu --n_cores 3 
         \n
+    {col['darker_pink']}HCP mode:{col['reset']}
+        python3 -m NFACT_PP --hcp_stream
+            --study_folder /home/mr_robot/subjects  
+            --list /home/mr_robot/for_axon/nfact_dev/sub_list  
+            --image_standard_space $FSLDIR/data/standard/MNI152_T1_2mm_brain.nii.gz 
+            --gpu --n_cores 3 
+            \n
 """
