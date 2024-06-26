@@ -139,6 +139,14 @@ def args() -> dict:
         default=False,
         help="Run on cluster",
     )
+    option.add_argument(
+        "-D",
+        "--dont_log",
+        dest="dont_log",
+        action="store_true",
+        default=False,
+        help="Run on cluster",
+    )
     return vars(option.parse_args())
 
 

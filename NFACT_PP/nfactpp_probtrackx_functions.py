@@ -147,7 +147,7 @@ def write_options_to_file(file_path: str, seed_txt: str):
         path of string to go into
         seed directory
     """
-    seeds = write_to_file(file_path, "seeds.txt", seed_txt)
+    seeds = write_to_file(file_path, "seeds.txt", seed_txt + "\n\n")
     if not seeds:
         return False
     return True
@@ -290,16 +290,21 @@ class Probtrackx:
     """
 
     def __init__(
-        self, command: list, cluster: bool = False, parallel: bool = False
+        self,
+        command: list,
+        cluster: bool = False,
+        parallel: bool = False,
+        dont_log: bool = False,
     ) -> None:
         self.command = command
         self.cluster = cluster
         self.parallel = parallel
+        self.dont_log = dont_log
 
         if self.parallel:
             self.parallel_mode()
         if self.cluster:
-            print("Cluster implementation currently not avaiable")
+            print("Cluster implementation currently not available")
             return None
         if not self.parallel and not self.cluster:
             self.single_subject_run()
@@ -321,14 +326,20 @@ class Probtrackx:
         print(
             f"Running",
             command[0],
-            f" on subject {os.path.basename(os.path.dirname(os.path.dirname(command[2])))}",
+            f"on subject {os.path.basename(os.path.dirname(os.path.dirname(command[2])))}",
         )
         try:
-            log_name = "PP_log_" + date_for_filename()
-            with open(os.path.join(nfactpp_diretory, log_name), "w") as log_file:
-                run = subprocess.run(
-                    command, stdout=log_file, stderr=log_file, universal_newlines=True
-                )
+            if not self.dont_log:
+                log_name = "PP_log_" + date_for_filename()
+                with open(os.path.join(nfactpp_diretory, log_name), "w") as log_file:
+                    run = subprocess.run(
+                        command,
+                        stdout=log_file,
+                        stderr=log_file,
+                        universal_newlines=True,
+                    )
+            if self.dont_log:
+                run = subprocess.run(command)
         except subprocess.CalledProcessError as error:
             error_and_exit(False, f"Error in calling probtrackx2: {error}")
         except KeyboardInterrupt:
@@ -345,7 +356,7 @@ class Probtrackx:
         Method to do single subject mode
         Loops over all the subject.
         """
-        print("Running in single subject mode")
+        print("\nRunning in single subject mode")
         for sub_command in self.command:
             self.run_probtrackx(sub_command)
 
@@ -354,7 +365,7 @@ class Probtrackx:
         Method to parallell process
         multiple subjects
         """
-        print(f"\nparrellel processing with {self.parallel} cores")
+        print(f"\nParrellel processing with {self.parallel} cores")
         pool = multiprocessing.Pool(processes=int(self.parallel))
 
         def kill_pool(sig, frame):
@@ -369,7 +380,7 @@ class Probtrackx:
             print(
                 f"\n{col['darker_pink']}Recieved kill signal (Ctrl+C). Terminating..."
             )
-            print(f"Exiting...{col['reset']}")
+            print(f"Exiting...{col['reset']}\n")
             exit(0)
 
         signal.signal(signal.SIGINT, kill_pool)

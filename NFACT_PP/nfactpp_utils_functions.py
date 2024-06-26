@@ -102,7 +102,7 @@ def error_and_exit(bool_statement: bool, error_message=None):
         if error_message:
             col = colours()
             print(col["red"] + error_message + col["reset"])
-        print("Exiting...")
+        print("Exiting...\n")
         exit(1)
 
 
@@ -138,7 +138,7 @@ class Signit_handler:
             print(
                 f"\n{col['darker_pink']}Recieved kill signal (Ctrl+C). Terminating..."
             )
-            print(f"Exiting...{col['reset']}")
+            print(f"Exiting...{col['reset']}\n")
         exit(0)
 
     @property

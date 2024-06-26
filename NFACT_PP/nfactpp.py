@@ -49,7 +49,7 @@ def main_nfact_preprocess(arg: dict, handler) -> None:
 
     for sub in arg["list_of_subjects"]:
         # looping over subjects and building out directories
-        print(f"\nSetting up {os.path.basename(sub)}")
+        print(f"\n{col['pink']}Setting up:{col['reset']} {os.path.basename(sub)}")
         seed = nff.get_file(arg["seed"], sub)
         seed_text = "\n".join(seed)
         nff.get_file(arg["warps"], sub)
@@ -132,7 +132,7 @@ def hcp_stream_main(arg: dict, handler: object) -> None:
     print("Number of subjects: ", len(arg["list_of_subjects"]))
     for sub in arg["list_of_subjects"]:
         # looping over subjects and building out directories
-        print("\nworking on: ", os.path.basename(sub))
+        print(f"\n{col['pink']}Setting up:{col['reset']} {os.path.basename(sub)}")
         seeds = hcp_get_seeds(sub)
         arg["rois"] = hcp_get_rois(sub)
         arg["mask"] = hcp_get_target_image(sub)
