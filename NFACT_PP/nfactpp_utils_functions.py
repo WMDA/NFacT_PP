@@ -40,7 +40,13 @@ def colours():
     dict: dictionary object
         dictionary of color strings
     """
-    return {"reset": "\033[0;0m", "red": "\033[1;31m", "purple": "\033[1;35m"}
+    return {
+        "reset": "\033[0;0m",
+        "red": "\033[1;31m",
+        "pink": "\033[1;35m",
+        "purple": "\033[38;5;93m",
+        "darker_pink": "\033[38;5;129m",
+    }
 
 
 def make_directory(path: str) -> None:
@@ -128,8 +134,11 @@ class Signit_handler:
         frame: The current stack frame
         """
         if not self.suppress_messages:
-            print("\nRecieved kill signal (Ctrl+C). Terminating...")
-            print("Exiting...")
+            col = colours()
+            print(
+                f"\n{col['darker_pink']}Recieved kill signal (Ctrl+C). Terminating..."
+            )
+            print(f"Exiting...{col['reset']}")
         exit(0)
 
     @property

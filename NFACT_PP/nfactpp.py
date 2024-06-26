@@ -38,10 +38,11 @@ def main_nfact_preprocess(arg: dict, handler) -> None:
 
     surface_processing = nff.check_surface_arguments(arg["seed"], arg["rois"])
     col = colours()
+
     if surface_processing:
-        print(f'{col["purple"]}Surface seeds mode{col["reset"]}')
+        print(f'{col["darker_pink"]}Surface seeds mode{col["reset"]}')
     else:
-        print(f'{col["purple"]}Volume seed mode{col["reset"]}')
+        print(f'{col["darker_pink"]}Volume seed mode{col["reset"]}')
 
     print("Number of subjects: ", len(arg["list_of_subjects"]))
     subjects_commands = []
@@ -52,7 +53,11 @@ def main_nfact_preprocess(arg: dict, handler) -> None:
         seed = nff.get_file(arg["seed"], sub)
         seed_text = "\n".join(seed)
         nff.get_file(arg["warps"], sub)
-        mask = nff.get_file([arg["mask"]], sub)[0]
+
+        if arg["target2"]:
+            mask = nff.get_file([arg["target2"]], sub)[0]
+        else:
+            mask = nff.get_file([arg["mask"]], sub)[0]
         nfactpp_diretory = os.path.join(sub, "nfact_pp")
         directory_created = make_directory(nfactpp_diretory)
         error_and_exit(directory_created)
@@ -75,13 +80,18 @@ def main_nfact_preprocess(arg: dict, handler) -> None:
 
         error_and_exit(write_options_to_file(nfactpp_diretory, seed_text))
 
-        get_target2(
-            mask,
-            os.path.join(nfactpp_diretory, "target2"),
-            arg["res"],
-            mask,
-            "nearestneighbour",
-        )
+        if not arg["target2"]:
+            print(
+                f'{col["purple"]}No target given. Creating a whole brain target.{col["reset"]}'
+            )
+            get_target2(
+                mask,
+                os.path.join(nfactpp_diretory, "target2"),
+                arg["res"],
+                mask,
+                "nearestneighbour",
+            )
+
         subjects_commands.append(
             build_probtrackx2_arguments(
                 arg,
@@ -117,7 +127,7 @@ def hcp_stream_main(arg: dict, handler: object) -> None:
 
     """
     col = colours()
-    print(f'{col["purple"]}HCP stream selected{col["reset"]}')
+    print(f'{col["darker_pink"]}HCP stream selected{col["reset"]}')
     subjects_commands = []
     print("Number of subjects: ", len(arg["list_of_subjects"]))
     for sub in arg["list_of_subjects"]:
@@ -147,13 +157,18 @@ def hcp_stream_main(arg: dict, handler: object) -> None:
         seed_text = "\n".join(asc_seeds)
         error_and_exit(write_options_to_file(nfactpp_diretory, seed_text))
 
-        get_target2(
-            arg["mask"],
-            os.path.join(nfactpp_diretory, "target2"),
-            arg["res"],
-            arg["mask"],
-            "nearestneighbour",
-        )
+        if not arg["target2"]:
+            print(
+                f'{col["purple"]}No target given. Creating a whole brain target.{col["reset"]}'
+            )
+
+            get_target2(
+                arg["mask"],
+                os.path.join(nfactpp_diretory, "target2"),
+                arg["res"],
+                arg["mask"],
+                "nearestneighbour",
+            )
         subjects_commands.append(build_probtrackx2_arguments(arg, sub, hcp_stream=True))
 
     if arg["n_cores"]:
