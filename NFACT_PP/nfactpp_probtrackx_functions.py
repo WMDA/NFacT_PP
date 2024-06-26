@@ -6,6 +6,7 @@ from NFACT_PP.nfactpp_utils_functions import (
     write_to_file,
     date_for_filename,
     error_and_exit,
+    colours,
 )
 
 
@@ -101,12 +102,12 @@ def build_probtrackx2_arguments(
     seeds = command_arguments["seed"]
     mask = os.path.join(command_arguments["bpx_path"], "nodif_brain_mask")
     target_mask = (
-        os.path.join(sub.arg["target2"])
+        os.path.join(sub, arg["target2"])
         if arg["target2"]
         else os.path.join(sub, "nfact_pp", "target2.nii.gz")
     )
     bpx = os.path.join(command_arguments["bpx_path"], "merged")
-    output_dir = os.path.join(sub, "nfact_pp", "omatrxi2")
+    output_dir = os.path.join(sub, "nfact_pp", "omatrix2")
 
     command = [
         binary,
@@ -236,9 +237,12 @@ class Probtrackx:
             the singit doesn't print it 100x
             times
             """
+            col = colours()
             pool.terminate()
-            print("\nRecieved kill signal(Ctrl+C). Terminating...")
-            print("Exiting...")
+            print(
+                f"\n{col['darker_pink']}Recieved kill signal (Ctrl+C). Terminating..."
+            )
+            print(f"Exiting...{col['reset']}")
             exit(0)
 
         signal.signal(signal.SIGINT, kill_pool)

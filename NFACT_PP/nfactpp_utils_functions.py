@@ -134,8 +134,11 @@ class Signit_handler:
         frame: The current stack frame
         """
         if not self.suppress_messages:
-            print("\nRecieved kill signal (Ctrl+C). Terminating...")
-            print("Exiting...")
+            col = colours()
+            print(
+                f"\n{col['darker_pink']}Recieved kill signal (Ctrl+C). Terminating..."
+            )
+            print(f"Exiting...{col['reset']}")
         exit(0)
 
     @property
