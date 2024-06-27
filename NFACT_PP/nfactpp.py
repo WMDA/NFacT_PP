@@ -11,6 +11,7 @@ from NFACT_PP.nfactpp_utils_functions import (
     hcp_get_rois,
     hcp_reorder_seeds_rois,
     colours,
+    update_seeds_file,
 )
 from NFACT_PP.nfactpp_probtrackx_functions import (
     build_probtrackx2_arguments,
@@ -92,9 +93,9 @@ def main_nfact_preprocess(arg: dict, handler) -> None:
                 f'{col["purple"]}No target given. Creating a whole brain target.{col["reset"]}'
             )
             get_target2(
-                mask,
+                arg["ref"],
                 os.path.join(nfactpp_diretory, "target2"),
-                arg["res"],
+                arg["ref"],
                 mask,
                 "nearestneighbour",
             )
@@ -113,7 +114,11 @@ def main_nfact_preprocess(arg: dict, handler) -> None:
 
     # Running probtrackx2
     Probtrackx(subjects_commands, arg["cluster"], arg["n_cores"], arg["dont_log"])
-
+    if surface_processing:
+        [
+            update_seeds_file(os.path.join(sub, arg["out"], "seeds.txt"))
+            for sub in arg["list_of_subjects"]
+        ]
     print("Finished")
     exit(0)
 
@@ -170,10 +175,10 @@ def hcp_stream_main(arg: dict, handler: object) -> None:
             )
 
             get_target2(
-                arg["mask"],
+                arg["ref"],
                 os.path.join(nfactpp_diretory, "target2"),
                 arg["res"],
-                arg["mask"],
+                arg["ref"],
                 "nearestneighbour",
             )
         subjects_commands.append(build_probtrackx2_arguments(arg, sub, hcp_stream=True))
@@ -182,7 +187,9 @@ def hcp_stream_main(arg: dict, handler: object) -> None:
         handler.set_suppress_messages = True
 
     Probtrackx(subjects_commands, arg["cluster"], arg["n_cores"])
-    seed_text = "\n".join(seeds)
-    error_and_exit(write_options_to_file(nfactpp_diretory, seed_text))
+    [
+        update_seeds_file(os.path.join(sub, arg["out"], "seeds.txt"))
+        for sub in arg["list_of_subjects"]
+    ]
     print("\nFinished HCP stream")
     exit(0)

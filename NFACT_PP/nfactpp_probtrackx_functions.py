@@ -148,7 +148,7 @@ def write_options_to_file(file_path: str, seed_txt: str):
         path of string to go into
         seed directory
     """
-    seeds = write_to_file(file_path, "seeds.txt", seed_txt + "\n\n")
+    seeds = write_to_file(file_path, "seeds.txt", seed_txt + "\n")
     if not seeds:
         return False
     return True
@@ -301,11 +301,13 @@ class Probtrackx:
         self.cluster = cluster
         self.parallel = parallel
         self.dont_log = dont_log
-
+        self.col = colours()
         if self.parallel:
             self.parallel_mode()
         if self.cluster:
-            print("Cluster implementation currently not available")
+            print(
+                f"{self.col['red']}Cluster implementation currently not available{self.col['reset']}"
+            )
             return None
         if not self.parallel and not self.cluster:
             self.single_subject_run()
@@ -357,7 +359,7 @@ class Probtrackx:
         Method to do single subject mode
         Loops over all the subject.
         """
-        print("\nRunning in single subject mode")
+        print(f"{self.col['pink']}\nRunning in single subject mode{self.col['reset']}")
         for sub_command in self.command:
             self.run_probtrackx(sub_command)
 
@@ -366,7 +368,9 @@ class Probtrackx:
         Method to parallell process
         multiple subjects
         """
-        print(f"\nParrellel processing with {self.parallel} cores")
+        print(
+            f"{self.col['pink']}\nParrellel processing with {self.parallel} cores{self.col['reset']}"
+        )
         pool = multiprocessing.Pool(processes=int(self.parallel))
 
         def kill_pool(sig, frame):
@@ -376,12 +380,12 @@ class Probtrackx:
             the singit doesn't print it 100x
             times
             """
-            col = colours()
+
             pool.terminate()
             print(
-                f"\n{col['darker_pink']}Recieved kill signal (Ctrl+C). Terminating..."
+                f"\n{self.col['darker_pink']}Recieved kill signal (Ctrl+C). Terminating..."
             )
-            print(f"Exiting...{col['reset']}\n")
+            print(f"Exiting...{self.col['reset']}\n")
             exit(0)
 
         signal.signal(signal.SIGINT, kill_pool)
