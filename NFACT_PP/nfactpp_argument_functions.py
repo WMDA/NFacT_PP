@@ -87,7 +87,8 @@ def args() -> dict:
         "-o",
         "--out",
         dest="out",
-        help="Path to output folder",
+        default="nfact_pp",
+        help="Name of folder to save results into. Default is nfact_pp",
     )
     option.add_argument(
         "-H",

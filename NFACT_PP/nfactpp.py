@@ -58,7 +58,14 @@ def main_nfact_preprocess(arg: dict, handler) -> None:
             mask = nff.get_file([arg["target2"]], sub)[0]
         else:
             mask = nff.get_file([arg["mask"]], sub)[0]
-        nfactpp_diretory = os.path.join(sub, "nfact_pp")
+
+        nfactpp_diretory = os.path.join(sub, arg["out"])
+
+        if os.path.exists(nfactpp_diretory):
+            print(
+                f'{col["red"]}{arg["out"]} directory already exists. Overwriting{col["reset"]}'
+            )
+
         directory_created = make_directory(nfactpp_diretory)
         error_and_exit(directory_created)
 
@@ -105,7 +112,7 @@ def main_nfact_preprocess(arg: dict, handler) -> None:
         handler.set_suppress_messages = True
 
     # Running probtrackx2
-    Probtrackx(subjects_commands, arg["cluster"], arg["n_cores"])
+    Probtrackx(subjects_commands, arg["cluster"], arg["n_cores"], arg["dont_log"])
 
     print("Finished")
     exit(0)
@@ -136,7 +143,7 @@ def hcp_stream_main(arg: dict, handler: object) -> None:
         seeds = hcp_get_seeds(sub)
         arg["rois"] = hcp_get_rois(sub)
         arg["mask"] = hcp_get_target_image(sub)
-        nfactpp_diretory = os.path.join(sub, "nfact_pp")
+        nfactpp_diretory = os.path.join(sub, arg["out"])
         directory_created = make_directory(nfactpp_diretory)
         error_and_exit(directory_created)
 

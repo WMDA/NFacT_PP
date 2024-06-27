@@ -10,7 +10,7 @@ from NFACT_PP.nfactpp_utils_functions import (
 )
 
 
-def hcp_files(sub: str) -> dict:
+def hcp_files(sub: str, out_dir: str) -> dict:
     """
     Function to return
     HCP standard seed, ROI
@@ -19,8 +19,9 @@ def hcp_files(sub: str) -> dict:
     Parameters
     ----------
     sub: str
-        string to subjects
-        files
+        string to subjects files
+    out_dir: str
+        str of name of out_dir
 
     Returns
     -------
@@ -38,7 +39,7 @@ def hcp_files(sub: str) -> dict:
     ]
     [error_and_exit(os.path.exists(path), f"Unable to find {path}") for path in warp]
     return {
-        "seed": os.path.join(sub, "nfact_pp", "seeds.txt"),
+        "seed": os.path.join(sub, out_dir, "seeds.txt"),
         "warps": warp,
         "bpx_path": bpx_path,
     }
@@ -65,7 +66,7 @@ def process_command_arguments(arg: dict, sub: str):
     """
     return {
         "warps": [os.path.join(sub, warp) for warp in arg["warps"]],
-        "seed": os.path.join(sub, "nfact_pp", "seeds.txt"),
+        "seed": os.path.join(sub, arg["out"], "seeds.txt"),
         "bpx_path": os.path.join(sub, arg["bpx_path"]),
     }
 
@@ -93,7 +94,7 @@ def build_probtrackx2_arguments(
     """
     if hcp_stream:
         print("HCP arguments")
-        command_arguments = hcp_files(sub)
+        command_arguments = hcp_files(sub, arg["out"])
     if not hcp_stream:
         command_arguments = process_command_arguments(arg, sub)
 
@@ -104,10 +105,10 @@ def build_probtrackx2_arguments(
     target_mask = (
         os.path.join(sub, arg["target2"])
         if arg["target2"]
-        else os.path.join(sub, "nfact_pp", "target2.nii.gz")
+        else os.path.join(sub, arg["out"], "target2.nii.gz")
     )
     bpx = os.path.join(command_arguments["bpx_path"], "merged")
-    output_dir = os.path.join(sub, "nfact_pp", "omatrix2")
+    output_dir = os.path.join(sub, arg["out"], "omatrix2")
 
     command = [
         binary,
