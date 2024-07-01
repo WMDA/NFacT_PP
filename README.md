@@ -62,21 +62,21 @@ An example set up
     │       ├── std2diff.nii.gz diff2std.nii.gz          - standard to diffusion warp (and visa versa)
     │       ├── seeds.gii/.nii                           - the seed files
     |       ├── target.nii.gz                            - the target file        
-    |       ├── mask.nii.gz                              - the mask file (not needed if target.nii given)                   
+    |       ├── mask.nii.gz                              - the mask file                   
     │       └── rois.gii                                 - the left and right medial wall files
     ├── subject-02
     │       ├── dmri.bedpostx                            - the bedpostx directory          
     │       ├── std2diff.nii.gz diff2std.nii.gz          - standard to diffusion warp (and visa versa)
     │       ├── seeds.gii/.nii                           - the seed files
     |       ├── target.nii.gz                            - the target file        
-    |       ├── mask.nii.gz                              - the mask file (not needed if target.nii given)                   
+    |       ├── mask.nii.gz                              - the mask file                  
     │       └── rois.gii                                 - the left and right medial wall files
     └── subject-03                 
     │       ├── dmri.bedpostx                            - the bedpostx directory          
     │       ├── std2diff.nii.gz diff2std.nii.gz          - standard to diffusion warp (and visa versa)
     │       ├── seeds.gii/.nii                           - the seed files
     |       ├── target.nii.gz                            - the target file        
-    |       ├── mask.nii.gz                              - the mask file (not needed if target.nii given)                   
+    |       ├── mask.nii.gz                              - the mask file                  
     │       └── rois.gii                                 - the left and right medial wall files
 ```
 
