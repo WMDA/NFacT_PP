@@ -87,7 +87,8 @@ def args() -> dict:
         "-o",
         "--out",
         dest="out",
-        help="Path to output folder",
+        default="nfact_pp",
+        help="Name of folder to save results into. Default is nfact_pp",
     )
     option.add_argument(
         "-H",
@@ -135,6 +136,14 @@ def args() -> dict:
         "-C",
         "--cluster",
         dest="cluster",
+        action="store_true",
+        default=False,
+        help="Run on cluster",
+    )
+    option.add_argument(
+        "-D",
+        "--dont_log",
+        dest="dont_log",
         action="store_true",
         default=False,
         help="Run on cluster",

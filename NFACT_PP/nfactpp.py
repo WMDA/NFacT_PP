@@ -11,6 +11,7 @@ from NFACT_PP.nfactpp_utils_functions import (
     hcp_get_rois,
     hcp_reorder_seeds_rois,
     colours,
+    update_seeds_file,
 )
 from NFACT_PP.nfactpp_probtrackx_functions import (
     build_probtrackx2_arguments,
@@ -49,7 +50,7 @@ def main_nfact_preprocess(arg: dict, handler) -> None:
 
     for sub in arg["list_of_subjects"]:
         # looping over subjects and building out directories
-        print(f"\nSetting up {os.path.basename(sub)}")
+        print(f"\n{col['pink']}Setting up:{col['reset']} {os.path.basename(sub)}")
         seed = nff.get_file(arg["seed"], sub)
         seed_text = "\n".join(seed)
         nff.get_file(arg["warps"], sub)
@@ -58,7 +59,14 @@ def main_nfact_preprocess(arg: dict, handler) -> None:
             mask = nff.get_file([arg["target2"]], sub)[0]
         else:
             mask = nff.get_file([arg["mask"]], sub)[0]
-        nfactpp_diretory = os.path.join(sub, "nfact_pp")
+
+        nfactpp_diretory = os.path.join(sub, arg["out"])
+
+        if os.path.exists(nfactpp_diretory):
+            print(
+                f'{col["red"]}{arg["out"]} directory already exists. Overwriting{col["reset"]}'
+            )
+
         directory_created = make_directory(nfactpp_diretory)
         error_and_exit(directory_created)
 
@@ -85,10 +93,10 @@ def main_nfact_preprocess(arg: dict, handler) -> None:
                 f'{col["purple"]}No target given. Creating a whole brain target.{col["reset"]}'
             )
             get_target2(
-                mask,
+                arg["ref"],
                 os.path.join(nfactpp_diretory, "target2"),
                 arg["res"],
-                mask,
+                arg["ref"],
                 "nearestneighbour",
             )
 
@@ -101,12 +109,17 @@ def main_nfact_preprocess(arg: dict, handler) -> None:
             )
         )
 
+    # This supresses the signit kill message or else it prints it off multiple times for each core
     if arg["n_cores"]:
         handler.set_suppress_messages = True
 
     # Running probtrackx2
-    Probtrackx(subjects_commands, arg["cluster"], arg["n_cores"])
-
+    Probtrackx(subjects_commands, arg["cluster"], arg["n_cores"], arg["dont_log"])
+    if surface_processing:
+        [
+            update_seeds_file(os.path.join(sub, arg["out"], "seeds.txt"))
+            for sub in arg["list_of_subjects"]
+        ]
     print("Finished")
     exit(0)
 
@@ -132,11 +145,11 @@ def hcp_stream_main(arg: dict, handler: object) -> None:
     print("Number of subjects: ", len(arg["list_of_subjects"]))
     for sub in arg["list_of_subjects"]:
         # looping over subjects and building out directories
-        print("\nworking on: ", os.path.basename(sub))
+        print(f"\n{col['pink']}Setting up:{col['reset']} {os.path.basename(sub)}")
         seeds = hcp_get_seeds(sub)
         arg["rois"] = hcp_get_rois(sub)
         arg["mask"] = hcp_get_target_image(sub)
-        nfactpp_diretory = os.path.join(sub, "nfact_pp")
+        nfactpp_diretory = os.path.join(sub, arg["out"])
         directory_created = make_directory(nfactpp_diretory)
         error_and_exit(directory_created)
 
@@ -163,10 +176,10 @@ def hcp_stream_main(arg: dict, handler: object) -> None:
             )
 
             get_target2(
-                arg["mask"],
+                arg["ref"],
                 os.path.join(nfactpp_diretory, "target2"),
                 arg["res"],
-                arg["mask"],
+                arg["ref"],
                 "nearestneighbour",
             )
         subjects_commands.append(build_probtrackx2_arguments(arg, sub, hcp_stream=True))
@@ -175,7 +188,9 @@ def hcp_stream_main(arg: dict, handler: object) -> None:
         handler.set_suppress_messages = True
 
     Probtrackx(subjects_commands, arg["cluster"], arg["n_cores"])
-    seed_text = "\n".join(seeds)
-    error_and_exit(write_options_to_file(nfactpp_diretory, seed_text))
+    [
+        update_seeds_file(os.path.join(sub, arg["out"], "seeds.txt"))
+        for sub in arg["list_of_subjects"]
+    ]
     print("\nFinished HCP stream")
     exit(0)

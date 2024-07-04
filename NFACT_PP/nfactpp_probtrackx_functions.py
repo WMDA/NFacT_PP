@@ -10,7 +10,7 @@ from NFACT_PP.nfactpp_utils_functions import (
 )
 
 
-def hcp_files(sub: str) -> dict:
+def hcp_files(sub: str, out_dir: str) -> dict:
     """
     Function to return
     HCP standard seed, ROI
@@ -19,8 +19,9 @@ def hcp_files(sub: str) -> dict:
     Parameters
     ----------
     sub: str
-        string to subjects
-        files
+        string to subjects files
+    out_dir: str
+        str of name of out_dir
 
     Returns
     -------
@@ -38,7 +39,7 @@ def hcp_files(sub: str) -> dict:
     ]
     [error_and_exit(os.path.exists(path), f"Unable to find {path}") for path in warp]
     return {
-        "seed": os.path.join(sub, "nfact_pp", "seeds.txt"),
+        "seed": os.path.join(sub, out_dir, "seeds.txt"),
         "warps": warp,
         "bpx_path": bpx_path,
     }
@@ -65,7 +66,7 @@ def process_command_arguments(arg: dict, sub: str):
     """
     return {
         "warps": [os.path.join(sub, warp) for warp in arg["warps"]],
-        "seed": os.path.join(sub, "nfact_pp", "seeds.txt"),
+        "seed": os.path.join(sub, arg["out"], "seeds.txt"),
         "bpx_path": os.path.join(sub, arg["bpx_path"]),
     }
 
@@ -93,7 +94,7 @@ def build_probtrackx2_arguments(
     """
     if hcp_stream:
         print("HCP arguments")
-        command_arguments = hcp_files(sub)
+        command_arguments = hcp_files(sub, arg["out"])
     if not hcp_stream:
         command_arguments = process_command_arguments(arg, sub)
 
@@ -104,10 +105,10 @@ def build_probtrackx2_arguments(
     target_mask = (
         os.path.join(sub, arg["target2"])
         if arg["target2"]
-        else os.path.join(sub, "nfact_pp", "target2.nii.gz")
+        else os.path.join(sub, arg["out"], "target2.nii.gz")
     )
     bpx = os.path.join(command_arguments["bpx_path"], "merged")
-    output_dir = os.path.join(sub, "nfact_pp", "omatrix2")
+    output_dir = os.path.join(sub, arg["out"], "omatrix2")
 
     command = [
         binary,
@@ -124,9 +125,9 @@ def build_probtrackx2_arguments(
         "--loopcheck",
         "--forcedir",
         "--opd",
+        "--pd",
         f"--nsamples={arg['nsamples']}",
         f"--dir={output_dir}",
-        "--pd",
     ]
     if ptx_options:
         command = command + ptx_options
@@ -147,7 +148,7 @@ def write_options_to_file(file_path: str, seed_txt: str):
         path of string to go into
         seed directory
     """
-    seeds = write_to_file(file_path, "seeds.txt", seed_txt)
+    seeds = write_to_file(file_path, "seeds.txt", seed_txt + "\n")
     if not seeds:
         return False
     return True
@@ -290,16 +291,23 @@ class Probtrackx:
     """
 
     def __init__(
-        self, command: list, cluster: bool = False, parallel: bool = False
+        self,
+        command: list,
+        cluster: bool = False,
+        parallel: bool = False,
+        dont_log: bool = False,
     ) -> None:
         self.command = command
         self.cluster = cluster
         self.parallel = parallel
-
+        self.dont_log = dont_log
+        self.col = colours()
         if self.parallel:
             self.parallel_mode()
         if self.cluster:
-            print("Cluster implementation currently not avaiable")
+            print(
+                f"{self.col['red']}Cluster implementation currently not available{self.col['reset']}"
+            )
             return None
         if not self.parallel and not self.cluster:
             self.single_subject_run()
@@ -321,14 +329,20 @@ class Probtrackx:
         print(
             f"Running",
             command[0],
-            f" on subject {os.path.basename(os.path.dirname(os.path.dirname(command[2])))}",
+            f"on subject {os.path.basename(os.path.dirname(os.path.dirname(command[2])))}",
         )
         try:
-            log_name = "PP_log_" + date_for_filename()
-            with open(os.path.join(nfactpp_diretory, log_name), "w") as log_file:
-                run = subprocess.run(
-                    command, stdout=log_file, stderr=log_file, universal_newlines=True
-                )
+            if not self.dont_log:
+                log_name = "PP_log_" + date_for_filename()
+                with open(os.path.join(nfactpp_diretory, log_name), "w") as log_file:
+                    run = subprocess.run(
+                        command,
+                        stdout=log_file,
+                        stderr=log_file,
+                        universal_newlines=True,
+                    )
+            if self.dont_log:
+                run = subprocess.run(command)
         except subprocess.CalledProcessError as error:
             error_and_exit(False, f"Error in calling probtrackx2: {error}")
         except KeyboardInterrupt:
@@ -345,7 +359,7 @@ class Probtrackx:
         Method to do single subject mode
         Loops over all the subject.
         """
-        print("Running in single subject mode")
+        print(f"{self.col['pink']}\nRunning in single subject mode{self.col['reset']}")
         for sub_command in self.command:
             self.run_probtrackx(sub_command)
 
@@ -354,7 +368,9 @@ class Probtrackx:
         Method to parallell process
         multiple subjects
         """
-        print(f"\nparrellel processing with {self.parallel} cores")
+        print(
+            f"{self.col['pink']}\nParrellel processing with {self.parallel} cores{self.col['reset']}"
+        )
         pool = multiprocessing.Pool(processes=int(self.parallel))
 
         def kill_pool(sig, frame):
@@ -364,12 +380,12 @@ class Probtrackx:
             the singit doesn't print it 100x
             times
             """
-            col = colours()
+
             pool.terminate()
             print(
-                f"\n{col['darker_pink']}Recieved kill signal (Ctrl+C). Terminating..."
+                f"\n{self.col['darker_pink']}Recieved kill signal (Ctrl+C). Terminating..."
             )
-            print(f"Exiting...{col['reset']}")
+            print(f"Exiting...{self.col['reset']}\n")
             exit(0)
 
         signal.signal(signal.SIGINT, kill_pool)

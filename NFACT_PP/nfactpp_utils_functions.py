@@ -102,7 +102,7 @@ def error_and_exit(bool_statement: bool, error_message=None):
         if error_message:
             col = colours()
             print(col["red"] + error_message + col["reset"])
-        print("Exiting...")
+        print("Exiting...\n")
         exit(1)
 
 
@@ -138,17 +138,21 @@ class Signit_handler:
             print(
                 f"\n{col['darker_pink']}Recieved kill signal (Ctrl+C). Terminating..."
             )
-            print(f"Exiting...{col['reset']}")
+            print(f"Exiting...{col['reset']}\n")
         exit(0)
 
     @property
     def get_suppress_messages(self):
-        """Getter for suppress_messages"""
+        """
+        Getter method for suppress_messages
+        """
         return self.suppress_messages
 
     @get_suppress_messages.setter
     def set_suppress_messages(self, value: bool) -> None:
-        """Setter for suppress_messages"""
+        """
+        Setter for suppress_messages
+        """
         self.suppress_messages = value
 
 
@@ -262,3 +266,28 @@ def hcp_reorder_seeds_rois(seeds: list, rois: list) -> dict:
     right_rois = [roi for roi in rois if "R.atlasroi" in roi][0]
 
     return {"left": [left_seed, left_rois], "right": [right_seed, right_rois]}
+
+
+def update_seeds_file(file_path: str) -> None:
+    """
+    Function to update file extension
+    in seeds.txt. Updates surface asc to
+    gii.
+
+    Parameters
+    ----------
+    file_path: str
+        string to file path
+
+    Returns
+    -------
+    None
+    """
+    try:
+        with open(file_path, "r") as file:
+            content = file.read()
+            update_extensions = content.replace(".asc", ".gii")
+        with open(file_path, "w") as file:
+            file.write(update_extensions)
+    except Exception as e:
+        error_and_exit(False, f"Unable to change seeds file due to {e}")
