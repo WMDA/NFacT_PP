@@ -95,8 +95,8 @@ def main_nfact_preprocess(arg: dict, handler) -> None:
             get_target2(
                 arg["ref"],
                 os.path.join(nfactpp_diretory, "target2"),
+                arg["res"],
                 arg["ref"],
-                mask,
                 "nearestneighbour",
             )
 
@@ -109,6 +109,7 @@ def main_nfact_preprocess(arg: dict, handler) -> None:
             )
         )
 
+    # This supresses the signit kill message or else it prints it off multiple times for each core
     if arg["n_cores"]:
         handler.set_suppress_messages = True
 

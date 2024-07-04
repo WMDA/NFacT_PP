@@ -125,9 +125,9 @@ def build_probtrackx2_arguments(
         "--loopcheck",
         "--forcedir",
         "--opd",
+        "--pd",
         f"--nsamples={arg['nsamples']}",
         f"--dir={output_dir}",
-        "--pd",
     ]
     if ptx_options:
         command = command + ptx_options

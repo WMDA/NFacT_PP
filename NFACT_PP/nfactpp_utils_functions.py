@@ -143,12 +143,16 @@ class Signit_handler:
 
     @property
     def get_suppress_messages(self):
-        """Getter for suppress_messages"""
+        """
+        Getter method for suppress_messages
+        """
         return self.suppress_messages
 
     @get_suppress_messages.setter
     def set_suppress_messages(self, value: bool) -> None:
-        """Setter for suppress_messages"""
+        """
+        Setter for suppress_messages
+        """
         self.suppress_messages = value
 
 
