@@ -54,7 +54,7 @@ def args() -> dict:
         "-t",
         "--target",
         dest="target2",
-        help="Path to target image. If not given will create a whole mask",
+        help="Path to target image. If not given will create a whole mask from reference image",
     )
     option.add_argument(
         "-s",
