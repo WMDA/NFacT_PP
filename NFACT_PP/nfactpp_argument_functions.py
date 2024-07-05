@@ -71,12 +71,6 @@ def args() -> dict:
         help="The suffixes of the paths leading to the left and right hemisphere medial wall masks (GIFTI)",
     )
     option.add_argument(
-        "-m",
-        "--mask",
-        dest="mask",
-        help="A whole brain/WM binary target mask in the same space as the seeds",
-    )
-    option.add_argument(
         "-w",
         "--warps",
         dest="warps",
