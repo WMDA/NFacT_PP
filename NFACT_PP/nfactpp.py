@@ -7,7 +7,6 @@ from NFACT_PP.nfactpp_utils_functions import (
     make_directory,
     error_and_exit,
     hcp_get_seeds,
-    hcp_get_target_image,
     hcp_get_rois,
     hcp_reorder_seeds_rois,
     colours,

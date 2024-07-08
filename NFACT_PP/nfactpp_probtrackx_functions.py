@@ -203,7 +203,10 @@ def get_target2(
             ],
             capture_output=True,
         )
-
+    except FileNotFoundError:
+        error_and_exit(
+            False, f"Unable to load FSL flirt. Check FSL is properly installed"
+        )
     except subprocess.CalledProcessError as error:
         error_and_exit(False, f"Error in calling FSL flirt: {error}")
     except KeyboardInterrupt:
