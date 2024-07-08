@@ -197,26 +197,6 @@ def hcp_get_seeds(sub: str) -> list:
     return seeds
 
 
-def hcp_get_target_image(sub: str) -> str:
-    """
-    Function to get target image
-    from HCP stream
-
-    Parameters
-    ---------
-    sub: str
-        string of subject
-
-    Returns
-    -------
-    target_img: str
-        string of path target image
-    """
-    target_img = os.path.join(sub, "MNINonLinear/wmparc.nii.gz")
-    error_and_exit(target_img, "Unable to find target image. Please check data.")
-    return target_img
-
-
 def hcp_get_rois(sub: str) -> list:
     """
     Function to get HCP stream ROIS

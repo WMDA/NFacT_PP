@@ -62,21 +62,18 @@ An example set up
     │       ├── std2diff.nii.gz diff2std.nii.gz          - standard to diffusion warp (and visa versa)
     │       ├── seeds.gii/.nii                           - the seed files
     |       ├── target.nii.gz                            - the target file        
-    |       ├── mask.nii.gz                              - the mask file                   
     │       └── rois.gii                                 - the left and right medial wall files
     ├── subject-02
     │       ├── dmri.bedpostx                            - the bedpostx directory          
     │       ├── std2diff.nii.gz diff2std.nii.gz          - standard to diffusion warp (and visa versa)
     │       ├── seeds.gii/.nii                           - the seed files
     |       ├── target.nii.gz                            - the target file        
-    |       ├── mask.nii.gz                              - the mask file                  
     │       └── rois.gii                                 - the left and right medial wall files
     └── subject-03                 
     │       ├── dmri.bedpostx                            - the bedpostx directory          
     │       ├── std2diff.nii.gz diff2std.nii.gz          - standard to diffusion warp (and visa versa)
     │       ├── seeds.gii/.nii                           - the seed files
     |       ├── target.nii.gz                            - the target file        
-    |       ├── mask.nii.gz                              - the mask file                  
     │       └── rois.gii                                 - the left and right medial wall files
 ```
 
@@ -112,7 +109,6 @@ options:
                         The suffixes of the paths leading to the left and right hemisphere cortical seeds (white-grey boundary GIFTI)
   -r ROIS [ROIS ...], --rois ROIS [ROIS ...]
                         The suffixes of the paths leading to the left and right hemisphere medial wall masks (GIFTI)
-  -m MASK, --mask MASK  A whole brain/WM binary target mask in the same space as the seeds
   -w WARPS [WARPS ...], --warps WARPS [WARPS ...]
                         The suffix of the path leading to the transforms between standard space and diffusion space
   -o OUT, --out OUT     Path to output folder
@@ -130,24 +126,22 @@ options:
 Example Usage:
     Seed surface mode:
            python3 -m NFACT_PP --study_folder /home/mr_robot/subjects
-               --list /home/mr_robot/for_axon/nfact_dev/sub_list
+               --list /home/mr_robot/sub_list
                --bpx_path Diffusion.bedpostX
                --seeds L.white.32k_fs_LR.surf.gii R.white.32k_fs_LR.surf.gii
                --rois L.atlasroi.32k_fs_LR.shape.gii  R.atlasroi.32k_fs_LR.shape.gii
                --warps standard2acpc_dc.nii.gz acpc_dc2standard.nii.gz
                --image_standard_space $FSLDIR/data/standard/MNI152_T1_2mm_brain.nii.gz
-               --mask wmparc.nii.gz
                --gpu --n_cores 3
 
 
     Volume surface mode:
             python3 -m NFACT_PP --study_folder /home/mr_robot/subjects
-                --list /home/mr_robot/for_axon/nfact_dev/sub_list
+                --list /home/mr_robot/sub_list
                 --bpx_path Diffusion.bedpostX
                 --seeds L.white.nii.gz R.white.nii.gz
                 --warps standard2acpc_dc.nii.gz acpc_dc2standard.nii.gz
                 --image_standard_space $FSLDIR/data/standard/MNI152_T1_2mm_brain.nii.gz
-                --mask wmparc.nii.gz
                 --target dlpfc.nii.gz
                 --gpu --n_cores 3
 
@@ -155,7 +149,7 @@ Example Usage:
     HCP mode:
         python3 -m NFACT_PP --hcp_stream
             --study_folder /home/mr_robot/subjects
-            --list /home/mr_robot/for_axon/nfact_dev/sub_list
+            --list /home/mr_robot/sub_list
             --image_standard_space $FSLDIR/data/standard/MNI152_T1_2mm_brain.nii.gz
             --gpu --n_cores 3
 

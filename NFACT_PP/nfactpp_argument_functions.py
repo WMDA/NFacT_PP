@@ -54,7 +54,7 @@ def args() -> dict:
         "-t",
         "--target",
         dest="target2",
-        help="Path to target image. If not given will create a whole mask",
+        help="Path to target image. If not given will create a whole mask from reference image",
     )
     option.add_argument(
         "-s",
@@ -69,12 +69,6 @@ def args() -> dict:
         dest="rois",
         nargs="+",
         help="The suffixes of the paths leading to the left and right hemisphere medial wall masks (GIFTI)",
-    )
-    option.add_argument(
-        "-m",
-        "--mask",
-        dest="mask",
-        help="A whole brain/WM binary target mask in the same space as the seeds",
     )
     option.add_argument(
         "-w",
@@ -194,23 +188,21 @@ def example_usage() -> str:
 Example Usage:
     {col['purple']}Seed surface mode:{col['reset']}
            python3 -m NFACT_PP --study_folder /home/mr_robot/subjects 
-               --list /home/mr_robot/for_axon/nfact_dev/sub_list  
+               --list /home/mr_robot/sub_list  
                --bpx_path Diffusion.bedpostX 
                --seeds L.white.32k_fs_LR.surf.gii R.white.32k_fs_LR.surf.gii 
                --rois L.atlasroi.32k_fs_LR.shape.gii  R.atlasroi.32k_fs_LR.shape.gii 
                --warps standard2acpc_dc.nii.gz acpc_dc2standard.nii.gz 
                --image_standard_space $FSLDIR/data/standard/MNI152_T1_2mm_brain.nii.gz 
-               --mask wmparc.nii.gz 
                --gpu --n_cores 3 
            \n
     {col['pink']}Volume surface mode:{col['reset']}
             python3 -m NFACT_PP --study_folder /home/mr_robot/subjects 
-                --list /home/mr_robot/for_axon/nfact_dev/sub_list  
+                --list /home/mr_robot/sub_list  
                 --bpx_path Diffusion.bedpostX 
                 --seeds L.white.nii.gz R.white.nii.gz 
                 --warps standard2acpc_dc.nii.gz acpc_dc2standard.nii.gz 
                 --image_standard_space $FSLDIR/data/standard/MNI152_T1_2mm_brain.nii.gz 
-                --mask wmparc.nii.gz 
                 --target dlpfc.nii.gz
                 --gpu --n_cores 3 
         \n

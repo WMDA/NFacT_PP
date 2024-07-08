@@ -67,10 +67,4 @@ if __name__ == "__main__":
     if arg["hcp_stream"]:
         hcp_stream_main(arg, handler)
 
-    if not arg["mask"] and not arg["target2"]:
-        error_and_exit(
-            False,
-            "No mask or target given. Please provide either a mask or target with -t/-m",
-        )
-
     main_nfact_preprocess(arg, handler)

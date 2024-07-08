@@ -7,7 +7,6 @@ from NFACT_PP.nfactpp_utils_functions import (
     make_directory,
     error_and_exit,
     hcp_get_seeds,
-    hcp_get_target_image,
     hcp_get_rois,
     hcp_reorder_seeds_rois,
     colours,
@@ -54,11 +53,6 @@ def main_nfact_preprocess(arg: dict, handler) -> None:
         seed = nff.get_file(arg["seed"], sub)
         seed_text = "\n".join(seed)
         nff.get_file(arg["warps"], sub)
-
-        if arg["target2"]:
-            mask = nff.get_file([arg["target2"]], sub)[0]
-        else:
-            mask = nff.get_file([arg["mask"]], sub)[0]
 
         nfactpp_diretory = os.path.join(sub, arg["out"])
 
@@ -148,7 +142,6 @@ def hcp_stream_main(arg: dict, handler: object) -> None:
         print(f"\n{col['pink']}Setting up:{col['reset']} {os.path.basename(sub)}")
         seeds = hcp_get_seeds(sub)
         arg["rois"] = hcp_get_rois(sub)
-        arg["mask"] = hcp_get_target_image(sub)
         nfactpp_diretory = os.path.join(sub, arg["out"])
         directory_created = make_directory(nfactpp_diretory)
         error_and_exit(directory_created)
